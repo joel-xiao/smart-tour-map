@@ -1,0 +1,113 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "智游地图",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/attraction/detail",
+			"style": {
+				"navigationBarTitleText": "景区详情",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/attraction/guide",
+			"style": {
+				"navigationBarTitleText": "景点导览",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/booking/index",
+			"style": {
+				"navigationBarTitleText": "预约通道",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/activity/detail",
+			"style": {
+				"navigationBarTitleText": "活动详情",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/map/index",
+			"style": {
+				"navigationBarTitleText": "全域导览",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/smart/index",
+			"style": {
+				"navigationBarTitleText": "智享服务",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/user/index",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/order/confirm",
+			"style": {
+				"navigationBarTitleText": "订单确认",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/web-view/web-view",
+			"style": {
+				"navigationBarTitleText": "全景查看",
+				"navigationStyle": "default"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "智游地图",
+		"navigationBarBackgroundColor": "#bc8f56",
+		"backgroundColor": "#F5F5F5"
+	},
+	"tabBar": {
+		"color": "#999",
+		"selectedColor": "#bc8f56",
+		"backgroundColor": "#fff",
+		"borderStyle": "black",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "首页",
+				"iconPath": "static/images/logos/logo.png",
+				"selectedIconPath": "static/images/logos/logo.png"
+			},
+			{
+				"pagePath": "pages/map/index",
+				"text": "全域导览",
+				"iconPath": "static/images/logos/logo.png",
+				"selectedIconPath": "static/images/logos/logo.png"
+			},
+			{
+				"pagePath": "pages/smart/index",
+				"text": "智享服务",
+				"iconPath": "static/images/logos/logo.png",
+				"selectedIconPath": "static/images/logos/logo.png"
+			},
+			{
+				"pagePath": "pages/user/index",
+				"text": "我的",
+				"iconPath": "static/images/logos/logo.png",
+				"selectedIconPath": "static/images/logos/logo.png"
+			}
+		]
+	},
+	"uniIdRouter": {}
+}
