@@ -1,12 +1,5 @@
 <template>
   <view class="route-detail" :class="{show: visible}">
-    <view class="route-header">
-      <view class="route-title">
-        <view class="name">{{route.name}}</view>
-        <view class="count">共有{{route.count}}个景点</view>
-      </view>
-      <view class="close-btn" @click="close">×</view>
-    </view>
     <scroll-view class="points-list" scroll-x>
       <view 
         v-for="(point, index) in points" 
@@ -33,10 +26,6 @@ export default {
       type: Boolean,
       default: false
     },
-    route: {
-      type: Object,
-      default: () => ({ name: '', count: 0 })
-    },
     points: {
       type: Array,
       default: () => []
@@ -47,9 +36,6 @@ export default {
     }
   },
   methods: {
-    close() {
-      this.$emit('close');
-    },
     selectPoint(index) {
       this.$emit('select-point', index);
     }
@@ -73,30 +59,6 @@ export default {
 
 .route-detail.show {
   height: 400rpx;
-}
-
-.route-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 20rpx;
-  border-bottom: 1rpx solid #eee;
-}
-
-.route-title .name {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-}
-
-.route-title .count {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.close-btn {
-  font-size: 40rpx;
-  color: #999;
-  padding: 0 10rpx;
 }
 
 .points-list {

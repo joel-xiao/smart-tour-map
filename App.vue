@@ -1,5 +1,9 @@
 <script>
 	export default {
+		globalData: {
+			systemInfo: null,
+			isNetworkAvailable: true
+		},
 		onLaunch: function() {
 			console.log('App Launch')
 			// 获取系统信息
@@ -29,9 +33,19 @@
 				try {
 					const systemInfo = uni.getSystemInfoSync()
 					console.log('系统信息:', systemInfo)
-					// 存储系统信息
-					getApp().globalData = getApp().globalData || {}
-					getApp().globalData.systemInfo = systemInfo
+					// 存储系统信息 - 安全地初始化globalData
+					const app = getApp()
+					// 确保app存在且可以访问
+					if (app) {
+						// 如果globalData不存在则初始化
+						if (!app.globalData) {
+							app.globalData = {}
+						}
+						app.globalData.systemInfo = systemInfo
+					} else {
+						// 如果无法获取app实例，则将系统信息存储在this上
+						this.systemInfo = systemInfo
+					}
 				} catch (e) {
 					console.error('获取系统信息失败:', e)
 				}

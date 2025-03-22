@@ -5,6 +5,7 @@ export default [
     shortName: "核心",
     count: 3,
     color: "#1aad19",
+    direction: "north",
     data: [
       {
         id: 1,
@@ -45,6 +46,7 @@ export default [
     shortName: "冬奥",
     count: 2,
     color: "#4080ff",
+    direction: "east",
     data: [
       {
         id: 5,
@@ -77,6 +79,7 @@ export default [
     shortName: "休闲",
     count: 3,
     color: "#ff6b6b",
+    direction: "south",
     data: [
       {
         id: 3,

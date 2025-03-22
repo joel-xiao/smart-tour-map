@@ -1,6 +1,7 @@
 <template>
-  <view class="locate-btn" :class="{ active: isLocated }" @click="locate">
+  <view class="locate-btn" :class="{ active: isLocated }" @click="locate" @longpress="onLongPress">
     <image class="icon-image" src="/static/images/icons/target.png"></image>
+    <view class="tooltip" v-if="showTooltip">长按选择位置</view>
   </view>
 </template>
 
@@ -15,9 +16,31 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      showTooltip: false,
+      tooltipTimer: null
+    }
+  },
+  mounted() {
+    // 显示工具提示一次
+    this.showTooltip = true;
+    this.tooltipTimer = setTimeout(() => {
+      this.showTooltip = false;
+    }, 3000);
+  },
+  beforeDestroy() {
+    // 清除定时器
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+    }
+  },
   methods: {
     locate() {
       this.$emit('locate');
+    },
+    onLongPress() {
+      this.$emit('longpress');
     }
   }
 }
@@ -36,9 +59,15 @@ export default {
   justify-content: center;
   align-items: center;
   box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
-  z-index: 10;
+  z-index: 40;
   transition: all 0.3s ease;
 }
+
+/* #ifdef H5 */
+.locate-btn {
+  bottom: 250rpx;
+}
+/* #endif */
 
 .locate-btn:active {
   transform: scale(0.9);
@@ -57,5 +86,21 @@ export default {
 
 .locate-btn.active .iconfont {
   color: #fff;
+}
+
+/* 工具提示样式 */
+.tooltip {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 10rpx;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 6rpx 12rpx;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+  white-space: nowrap;
+  z-index: 41;
 }
 </style> 

@@ -1,61 +1,77 @@
 <template>
-  <view class="map-container">
-    <!-- 导航栏占位 -->
-    <view class="nav-placeholder" :style="{height: statusBarHeight + 44 + 'px'}"></view>
-    
-    <!-- 地图容器 -->
-    <map-container
-      ref="mapContainer"
-      :markers="markers"
-      :route="route"
-      :circles="circles"
-      :showRoute="showRouteDeck || showRouteDetail"
-      @marker-tap="onMarkerTap"
-      @map-ready="onMapReady"
-    >
-      <!-- 侧边菜单 -->
-      <view class="sidebar">
-        <view class="menu-item" @click="showBoard">
-          <image class="icon-image" src="/static/images/icons/board.png"></image>
+  <view class="root-container">
+    <view class="map-container">
+      <!-- 导航栏占位 -->
+      <view class="nav-placeholder" :style="{height: statusBarHeight + 44 + 'px'}"></view>
+      
+      <!-- 地图容器 -->
+      <map-container
+        ref="mapContainer"
+        :markers="markers"
+        :route="route"
+        :circles="circles"
+        :showRoute="showRouteDeck || showRouteDetail"
+        @marker-tap="onMarkerTap"
+        @map-ready="onMapReady"
+      >
+        <!-- 右上角控制按钮 -->
+        <view class="top-right-controls" :style="{top: (statusBarHeight + 70) + 'px'}">
+          <view class="control-btn board-btn" @click="showBoard">
+            <image class="icon-image" src="/static/images/icons/board.png"></image>
+          </view>
+          <view class="control-btn category-btn" @click="toggleCategoryMenu">
+            <image class="icon-image" src="/static/images/icons/navigate.png"></image>
+          </view>
         </view>
-        <category-menu
-          :categories="categories"
-          :currentCatIndex="currentCatIndex"
-          @select="selectCategory"
+        
+        <!-- 侧边菜单 -->
+        <view class="sidebar" :style="{top: (statusBarHeight + 64) + 'px'}" v-if="false">
+          <view class="menu-item" @click="showBoard">
+            <image class="icon-image" src="/static/images/icons/board.png"></image>
+          </view>
+          <category-menu
+            :categories="categories"
+            :currentCatIndex="currentCatIndex"
+            @select="selectCategory"
+          />
+        </view>
+        
+        <!-- 定位按钮 -->
+        <location-button
+          :isLocated="isLocated"
+          @locate="locate"
+          @longpress="chooseLocation"
         />
-      </view>
-      
-      <!-- 定位按钮 -->
-      <location-button
-        :isLocated="isLocated"
-        @locate="locate"
-      />
-      
-      <!-- 手动选择位置按钮 -->
-      <view class="location-btn" @click="chooseLocation">
-        <image class="icon-image" src="/static/images/icons/location.png"></image>
-      </view>
-      
-      <!-- 路线按钮 -->
-      <route-button
-        :routes="routes"
-        :showRouteDeck="showRouteDeck"
-        :showRouteDetail="showRouteDetail"
-        @toggle-deck="toggleRoute"
-        @select="selectRoute"
-        @close-detail="closeRouteDetail"
-      />
-      
-      <!-- 路线详情面板 -->
-      <route-detail-panel
-        :visible="showRouteDetail"
-        :route="currentRoute"
-        :points="pointsList"
-        :selectedPointIndex="selectedPointIndex"
-        @close="closeRouteDetail"
-        @select-point="selectPoint"
-      />
-    </map-container>
+        
+        <!-- 右侧分类菜单 -->
+        <view class="category-side-menu" :class="{hide: !showCategoryMenu}" :style="{top: (statusBarHeight + 240) + 'px'}">
+          <view 
+            v-for="(category, index) in categories" 
+            :key="index"
+            class="category-side-item" 
+            :class="{active: currentCatIndex === index}" 
+            @click="selectCategory(index)"
+          >
+            <image 
+              class="category-icon" 
+              :src="getCategoryIcon(index)"
+            ></image>
+            <text>{{category}}</text>
+          </view>
+        </view>
+      </map-container>
+    </view>
+    
+    <!-- 游按钮 - 完全独立于地图容器 -->
+    <route-button
+      :routes="routes"
+      :showRouteDeck="showRouteDeck"
+      :showRouteDetail="showRouteDetail"
+      :selectedRouteIndex="selectedRouteIndex"
+      @toggle-deck="toggleRoute"
+      @select="selectRoute"
+      @close-detail="closeRouteDetail"
+    />
   </view>
 </template>
 
@@ -70,7 +86,6 @@ import MapContainer from '@/components/map/MapContainer.vue';
 import CategoryMenu from '@/components/map/controls/CategoryMenu.vue';
 import LocationButton from '@/components/map/controls/LocationButton.vue';
 import RouteButton from '@/components/map/controls/RouteButton.vue';
-import RouteDetailPanel from '@/components/map/panels/RouteDetailPanel.vue';
 
 // 确保标记点有有效的图标
 const ensureValidMarkerIcons = (markers) => {
@@ -91,7 +106,6 @@ export default {
     CategoryMenu,
     LocationButton,
     RouteButton,
-    RouteDetailPanel
   },
   data() {
     return {
@@ -102,6 +116,7 @@ export default {
       
       // 定位状态
       isLocated: false,
+      hasShownTip: false, // 是否已显示提示
       
       // 导航栏高度
       statusBarHeight: 20,
@@ -118,13 +133,7 @@ export default {
       pointsList: [],
       
       // 数据
-      categories: [
-        { name: '全部', icon: 'attraction', color: '#1aad19' },
-        { name: '景点', icon: 'attraction', color: '#bc8f56' },
-        { name: '饮食', icon: 'food', color: '#ff6b6b' },
-        { name: '住宿', icon: 'hotel', color: '#4080ff' },
-        { name: '购物', icon: 'shop', color: '#9c27b0' }
-      ],
+      categories: [],
       
       markers: [],
       allMarkers: [],
@@ -132,6 +141,7 @@ export default {
       route: [],
       circles: [],
       mapReady: false,
+      showCategoryMenu: true,
     }
   },
   computed: {
@@ -149,6 +159,9 @@ export default {
     // 初始化地图数据
     this.loadMarkers();
     this.loadRoutes();
+    
+    // 默认选中"全部"分类
+    this.currentCatIndex = 0;
     
     // 获取系统信息设置导航栏高度
     try {
@@ -178,7 +191,17 @@ export default {
     updateMapView() {
       if (!this.mapReady || !this.mapContainerRef) return;
       
+      console.log('更新地图视野，当前分类:', this.categories[this.currentCatIndex]);
+      console.log('当前标记点数量:', this.markers.length);
+      
+      // 延迟执行，确保数据已更新
       setTimeout(() => {
+        // 先移除所有标记点再重新添加，确保视图刷新
+        if (this.mapContainerRef.mapContext) {
+          this.mapContainerRef.updateMapMarkers();
+        }
+        
+        // 调整地图视野以包含所有标记点
         this.mapContainerRef.includePoints(100);
       }, 500);
     },
@@ -189,8 +212,13 @@ export default {
         console.log('开始加载标记点数据');
         this.allMarkers = markersData;
         
+        // 更新分类数组，使用数据源中的分类
+        this.categories = this.allMarkers.map(category => category.name);
+        console.log('更新分类数组:', this.categories);
+        
         // 处理标记点图标
         for (const category of this.allMarkers) {
+          console.log(`处理分类: ${category.name}, 图标类型: ${category.icon}`);
           for (const marker of category.data) {
             // 根据marker.icon属性选择合适的图标
             switch(marker.icon) {
@@ -233,7 +261,7 @@ export default {
         
         // 设置当前分类的标记点
         this.markers = this.allMarkers[this.currentCatIndex].data;
-        console.log('标记点数据加载完成');
+        console.log(`初始加载分类[${this.currentCatIndex}]: ${this.categories[this.currentCatIndex]}, 标记点数量: ${this.markers.length}`);
       } catch (error) {
         console.error('加载标记点数据错误:', error);
         this.handleError('加载标记点失败，请重试');
@@ -304,17 +332,65 @@ export default {
     
     // 显示公告板
     showBoard() {
-      uni.showToast({
-        title: '公告板功能开发中',
-        icon: 'none'
+      uni.showModal({
+        title: '校园公告',
+        content: '欢迎使用校园地图导览系统！\n\n1. 点击右侧分类菜单可筛选不同类型的地点\n2. 点击地图上的标记点可查看详细信息\n3. 点击底部"游"按钮可查看推荐路线\n4. 左下角按钮可定位到当前位置',
+        showCancel: false,
+        confirmText: '我知道了'
       });
     },
     
     // 选择分类
     selectCategory(index) {
+      console.log(`正在切换到分类: ${this.categories[index]}`);
+      
+      // 检查分类索引是否有效
+      if (index < 0 || index >= this.allMarkers.length) {
+        console.error(`无效的分类索引: ${index}, 分类总数: ${this.allMarkers.length}`);
+        uni.showToast({
+          title: '该分类暂无数据',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 如果已经是当前分类，不做任何操作
+      if (this.currentCatIndex === index) {
+        console.log(`已经是当前分类: ${this.categories[index]}`);
+        return;
+      }
+      
+      // 更新状态
       this.currentCatIndex = index;
+      
+      // 检查是否该分类有数据
+      if (!this.allMarkers[index] || !this.allMarkers[index].data || this.allMarkers[index].data.length === 0) {
+        console.error(`分类 ${this.categories[index]} 没有标记点数据`);
+        this.markers = [];
+        uni.showToast({
+          title: '该分类暂无标记点',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      // 更新标记点数据
       this.markers = this.allMarkers[index].data;
-      this.updateMapView();
+      
+      // 确保markers数据被正确更新并通知地图组件
+      this.$nextTick(() => {
+        console.log(`切换到分类: ${this.categories[index]}, 分类图标: ${this.allMarkers[index].icon}, 标记点数量: ${this.markers.length}`);
+        if (this.mapContainerRef) {
+          this.mapContainerRef.updateMapMarkers();
+          this.updateMapView();
+        }
+      });
+      
+      // 显示提示
+      uni.showToast({
+        title: `已选择${this.categories[index]}类别`,
+        icon: 'none'
+      });
     },
     
     // 切换路线面板
@@ -544,10 +620,44 @@ export default {
     
     // 定位
     locate() {
+      // 第一次点击时显示操作提示
+      if (!this.hasShownTip) {
+        this.hasShownTip = true;
+        uni.showToast({
+          title: '点击：获取当前位置\n长按：手动选择位置',
+          icon: 'none',
+          duration: 2000
+        });
+        return;
+      }
+      
       // 显示加载提示
       uni.showLoading({
         title: '正在获取位置...'
       });
+      
+      // #ifdef MP-WEIXIN
+      // 特殊处理：检测是否为开发工具的游客模式
+      const systemInfo = uni.getSystemInfoSync();
+      const isDevTools = systemInfo.platform === 'devtools';
+      
+      // 在开发者工具中，可能处于游客模式，无法正常获取位置
+      if (isDevTools) {
+        console.log('开发者工具环境，可能无法正常获取位置');
+        // 开发工具环境下，直接显示提示并使用默认位置
+        uni.showModal({
+          title: '提示',
+          content: '开发者工具中可能无法获取真实位置，已切换到默认位置',
+          showCancel: false,
+          success: () => {
+            // 使用默认位置
+            this.useDefaultLocation();
+            uni.hideLoading();
+          }
+        });
+        return;
+      }
+      // #endif
       
       // 获取当前位置
       MapService.getCurrentLocation()
@@ -582,16 +692,12 @@ export default {
           let errorMsg = '获取位置失败';
           
           if (typeof err === 'object' && err.errMsg) {
-            if (err.errMsg.indexOf('auth') > -1) {
-              errorMsg = '位置权限被拒绝，请在设置中开启';
-            } else if (err.errMsg.indexOf('timeout') > -1) {
-              errorMsg = '获取位置超时，请检查网络';
-            }
+            errorMsg = err.errMsg;
           }
           
           uni.showModal({
-            title: '提示',
-            content: errorMsg,
+            title: '定位失败',
+            content: errorMsg + '，已切换到默认位置',
             showCancel: false
           });
           
@@ -609,11 +715,36 @@ export default {
       // 移动到默认位置
       if (this.mapContainerRef) {
         this.mapContainerRef.moveToLocation(defaultLoc.longitude, defaultLoc.latitude, defaultLoc.scale);
+        
+        // 提供视觉反馈
+        this.isLocated = true;
+        setTimeout(() => {
+          this.isLocated = false;
+        }, 2000);
+        
+        // 更新地图视野
+        setTimeout(() => {
+          this.updateMapView();
+        }, 500);
       }
+      
+      // 显示提示
+      uni.showToast({
+        title: '已切换到默认位置',
+        icon: 'success',
+        duration: 1500
+      });
     },
     
     // 手动选择位置
     chooseLocation() {
+      // 显示操作提示
+      uni.showToast({
+        title: '请选择位置...',
+        icon: 'none',
+        duration: 1000
+      });
+      
       MapService.chooseLocation()
         .then(res => {
           console.log('手动选择位置成功:', res);
@@ -643,17 +774,79 @@ export default {
             icon: 'none'
           });
         });
-    }
+    },
+    
+    // 显示提示
+    showToast(message) {
+      uni.showToast({
+        title: `${message}功能开发中`,
+        icon: 'none',
+        duration: 2000
+      });
+    },
+    
+    // 切换分类菜单
+    toggleCategoryMenu() {
+      this.showCategoryMenu = !this.showCategoryMenu;
+    },
+    
+    // 获取分类图标
+    getCategoryIcon(index) {
+      // 如果有 allMarkers 中对应索引的分类信息，则使用其图标
+      if (this.allMarkers && this.allMarkers.length > index && this.allMarkers[index]) {
+        const category = this.allMarkers[index];
+        console.log(`获取分类 ${index} 图标, 名称: ${category.name}, 图标: ${category.icon}`);
+        
+        // 根据分类的 icon 属性返回对应图标
+        switch(category.icon) {
+          case 'all':
+            return '/static/images/markers/jd.png';
+          case 'attraction':
+            return '/static/images/markers/jd.png';
+          case 'hotel':
+            return '/static/images/markers/jxl.png';
+          case 'food':
+            return '/static/images/markers/shfw.png';
+          case 'entrance':
+            return '/static/images/markers/jt.png';
+          case 'shop':
+            return '/static/images/markers/xsss.png';
+          default:
+            return '/static/images/markers/jd.png';
+        }
+      }
+      
+      // 默认图标映射
+      switch(index) {
+        case 0: return '/static/images/markers/jd.png'; // 全部
+        case 1: return '/static/images/markers/jd.png'; // 景点
+        case 2: return '/static/images/markers/jxl.png'; // 住宿
+        case 3: return '/static/images/markers/shfw.png'; // 餐饮
+        case 4: return '/static/images/markers/jt.png'; // 交通
+        case 5: return '/static/images/markers/xsss.png'; // 购物
+        case 6: return '/static/images/markers/tycs.png'; // 体育场馆
+        case 7: return '/static/images/markers/jd.png'; // 其他
+        default: return '/static/images/markers/jd.png';
+      }
+    },
   }
 }
 </script>
 
 <style>
+/* 根容器 */
+.root-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 地图容器 */
 .map-container {
   width: 750rpx;
   height: 100vh;
   position: relative;
-  overflow: hidden;
 }
 
 /* 导航栏占位 */
@@ -665,12 +858,18 @@ export default {
   box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
 }
 
+/* H5特定样式，解决导航栏遮挡问题 */
+/* #ifdef H5 */
+.map-container {
+  padding-bottom: 100rpx;
+}
+/* #endif */
+
 /* 侧边菜单 */
 .sidebar {
   position: fixed;
-  top: 100rpx;
   right: 20rpx;
-  z-index: 10;
+  z-index: 100;
 }
 
 .menu-item {
@@ -691,27 +890,6 @@ export default {
   height: 36rpx;
 }
 
-/* 手动选择位置按钮 */
-.location-btn {
-  position: fixed;
-  left: 20rpx;
-  bottom: 100rpx;
-  width: 80rpx;
-  height: 80rpx;
-  background-color: #fff;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
-  z-index: 10;
-}
-
-.location-btn .icon-image {
-  width: 40rpx;
-  height: 40rpx;
-}
-
 /* 强制隐藏各种地图平台的缩放控件 */
 .amap-zoom, .amap-zoom-touch-container, .amap-controls, 
 .tdt-control-zoom, .tmap-control-zoom, [class*="zoom-control"], [class*="zoomControl"],
@@ -721,5 +899,131 @@ export default {
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+}
+
+/* 修复微信小程序下的样式问题 */
+page {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+/* 右侧分类菜单 */
+.category-side-menu {
+  position: fixed;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 10rpx 0 0 10rpx;
+  box-shadow: -2rpx 0 10rpx rgba(0,0,0,0.2);
+  z-index: 900;
+  padding: 15rpx 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  max-height: 70vh;
+  width: 100rpx;
+}
+
+/* 隐藏滚动条 */
+.category-side-menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
+.category-side-menu.hide {
+  transform: translateX(100%);
+}
+
+.category-side-item {
+  padding: 16rpx 20rpx;
+  font-size: 26rpx;
+  color: #333;
+  text-align: center;
+  border-bottom: 1rpx solid #eee;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-side-item .category-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-bottom: 5rpx;
+}
+
+.category-side-item text {
+  font-size: 24rpx;
+}
+
+.category-side-item:last-child {
+  border-bottom: none;
+}
+
+.category-side-item.active {
+  background-color: #5CACEE;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.category-side-item.active .category-icon {
+  filter: brightness(5);
+}
+
+/* 右上角控制按钮 */
+.top-right-controls {
+  position: fixed;
+  right: 20rpx;
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 20rpx;
+  /* #ifdef MP-WEIXIN */
+  padding-top: 10rpx;
+  /* #endif */
+}
+
+.control-btn {
+  width: 100rpx;
+  height: 100rpx;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 15rpx rgba(0,0,0,0.15);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.board-btn {
+  margin-bottom: 60rpx;
+}
+
+.category-btn {
+  margin-top: 10rpx;
+}
+
+.control-btn:active {
+  transform: scale(0.9);
+  background-color: #f5f5f5;
+}
+
+.control-btn .icon-image {
+  width: 50rpx;
+  height: 50rpx;
+}
+
+/* 统一设置地图上控件的z-index，确保它们在地图上方 */
+.location-button,
+.route-button,
+.top-right-controls,
+.category-side-menu {
+  z-index: 999 !important;
 }
 </style> 

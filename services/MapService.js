@@ -116,22 +116,29 @@ export function getCurrentLocation() {
   return new Promise((resolve, reject) => {
     // 小程序环境
     // #ifdef MP-WEIXIN
-    uni.authorize({
-      scope: 'scope.userLocation',
-      success: () => {
-        uni.getLocation({
-          type: 'gcj02',
-          success: res => {
-            resolve(res);
-          },
-          fail: err => {
-            reject(err);
-          }
-        });
+    // 在游客模式下，authorize 可能会失败，直接尝试获取位置
+    uni.getLocation({
+      type: 'gcj02',
+      success: res => {
+        resolve(res);
       },
-      fail: (err) => {
+      fail: err => {
+        console.error('获取位置失败:', err);
+        
+        // 判断错误类型
+        let errMsg = '定位失败';
+        if (err.errMsg) {
+          if (err.errMsg.indexOf('auth') > -1) {
+            errMsg = '位置权限被拒绝，请在设置中开启';
+          } else if (err.errMsg.indexOf('timeout') > -1) {
+            errMsg = '获取位置超时，请检查网络';
+          } else if (err.errMsg.indexOf('game') > -1 || err.errMsg.indexOf('guest') > -1) {
+            errMsg = '游客模式无法获取位置，请使用真机调试';
+          }
+        }
+        
         reject({
-          errMsg: '位置权限被拒绝，请在设置中开启',
+          errMsg,
           ...err
         });
       }
