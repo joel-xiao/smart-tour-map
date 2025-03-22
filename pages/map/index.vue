@@ -1,9 +1,6 @@
 <template>
   <view class="root-container">
     <view class="map-container">
-      <!-- 导航栏占位 -->
-      <view class="nav-placeholder" :style="{height: statusBarHeight + 44 + 'px'}"></view>
-      
       <!-- 地图容器 -->
       <map-container
         ref="mapContainer"
@@ -15,7 +12,7 @@
         @map-ready="onMapReady"
       >
         <!-- 右上角控制按钮 -->
-        <view class="top-right-controls" :style="{top: (statusBarHeight + 70) + 'px'}">
+        <view class="top-right-controls" :style="{top: (statusBarHeight + 20) + 'px'}">
           <view class="control-btn board-btn" @click="showBoard">
             <image class="icon-image" src="/static/images/common/board.png"></image>
           </view>
@@ -25,7 +22,7 @@
         </view>
         
         <!-- 侧边菜单 -->
-        <view class="sidebar" :style="{top: (statusBarHeight + 64) + 'px'}" v-if="false">
+        <view class="sidebar" :style="{top: (statusBarHeight + 20) + 'px'}" v-if="false">
           <view class="menu-item" @click="showBoard">
             <image class="icon-image" src="/static/images/common/board.png"></image>
           </view>
@@ -44,7 +41,7 @@
         />
         
         <!-- 右侧分类菜单 -->
-        <view class="category-side-menu" :class="{hide: !showCategoryMenu}" :style="{top: (statusBarHeight + 240) + 'px'}">
+        <view class="category-side-menu" :class="{hide: !showCategoryMenu}" :style="{top: (statusBarHeight + 120) + 'px'}">
           <view 
             v-for="(category, index) in categories" 
             :key="index"
