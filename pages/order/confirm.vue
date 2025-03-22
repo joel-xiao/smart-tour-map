@@ -83,40 +83,65 @@
         </view>
       </view>
       
-      <!-- 票种信息 -->
+      <!-- 项目列表 -->
       <view class="project-list">
         <view class="section-title">
-          <text>项目列表</text>
+          <text>票种信息</text>
         </view>
         
-        <view class="project-item">
+        <view class="project-item" v-for="(ticket, index) in ticketInfo" :key="index">
           <view class="project-icon">
             <text class="iconfont icon-ticket"></text>
           </view>
           <view class="project-info">
-            <view class="project-name">缆车双程票</view>
-            <view class="project-desc">可乘坐缆车往返八达岭长城脚下至长城上</view>
+            <view class="project-name">{{ticket.name}}</view>
+            <view class="project-price">
+              <text class="price-symbol">¥</text>
+              <text>{{ticket.price}}</text>
+              <text class="price-unit">x {{ticket.count}}</text>
+            </view>
+            <view class="project-tags" v-if="ticket.tags && ticket.tags.length > 0">
+              <text class="tag-item" v-for="(tag, tagIndex) in ticket.tags" :key="tagIndex">{{tag}}</text>
+            </view>
           </view>
         </view>
         
-        <view class="project-item">
-          <view class="project-icon">
-            <text class="iconfont icon-ticket"></text>
-          </view>
-          <view class="project-info">
-            <view class="project-name">成人票</view>
-            <view class="project-desc">八达岭长城景区门票（淡季）</view>
-          </view>
+        <view class="no-items" v-if="!ticketInfo || ticketInfo.length === 0">
+          <text>没有选择票种</text>
         </view>
       </view>
-      
-      <!-- 景点描述 -->
-      <view class="scenic-desc">
-        <view class="section-title">
-          <text>景点介绍</text>
+    </view>
+    
+    <!-- 订单信息 -->
+    <view class="order-info-section">
+      <view class="section-title">
+        <text>订单信息</text>
+      </view>
+      <view class="order-info-item">
+        <text class="label">订单编号</text>
+        <text class="value">{{orderInfo.orderNo}}</text>
+      </view>
+      <view class="order-info-item">
+        <text class="label">下单时间</text>
+        <text class="value">{{orderInfo.createTime}}</text>
+      </view>
+    </view>
+    
+    <!-- 支付方式 -->
+    <view class="payment-section">
+      <view class="section-title">
+        <text>支付方式</text>
+      </view>
+      <view class="payment-options">
+        <view class="payment-option" :class="{active: paymentMethod === 'wechat'}" @click="selectPayment('wechat')">
+          <view class="payment-icon iconfont icon-wechat"></view>
+          <view class="payment-name">微信支付</view>
+          <view class="payment-check" v-if="paymentMethod === 'wechat'">✓</view>
         </view>
-        <view class="desc-content">
-          <text>八达岭长城是万里长城向游人开放最早的地段，也是最具代表性的一段，是明长城的一个隘口。居庸关外古长城连绵群山之中，为京北重要关口。八达岭长城为居庸关的重要前哨，古称"居庸之险不在关而在八达岭"。明朝初年开始了以八达岭为中心的长城修筑，而现在所看到的八达岭长城多为明代中期所修。</text>
+        <view class="payment-option" :class="{active: paymentMethod === 'alipay'}" @click="selectPayment('alipay')">
+          <view class="payment-icon iconfont icon-alipay"></view>
+          <view class="payment-name">支付宝</view>
+          <view class="payment-check" v-if="paymentMethod === 'alipay'">✓</view>
         </view>
       </view>
     </view>
@@ -133,7 +158,7 @@
           <text class="amount">{{totalPrice.toFixed(2)}}</text>
         </text>
       </view>
-      <view class="add-btn" @click="confirmOrder">+</view>
+      <view class="pay-btn" @click="confirmOrder">立即支付</view>
     </view>
   </view>
 </template>
@@ -146,12 +171,18 @@ export default {
       dateList: ['2025-03-22', '2025-03-23', '2025-03-24', '2025-03-25'],
       currentDateIndex: 0,
       orderInfo: {
-        title: '八达岭长城成人票【淡季】+缆车双程票',
+        title: '',
         date: '03月22日',
         dayText: '今天',
-        quantity: 1
+        quantity: 1,
+        orderNo: 'SCT' + new Date().getTime(),
+        createTime: this.formatDate(new Date())
       },
-      unitPrice: 175,
+      unitPrice: 0,
+      // 接收从详情页传递的数据
+      ticketInfo: [],
+      totalCount: 0,
+      totalAmount: 0,
       // 日历相关数据
       showCalendar: false,
       weekDays: ['一', '二', '三', '四', '五', '六', '日'],
@@ -161,12 +192,13 @@ export default {
       daysArray: [],
       bottomBarHeight: 140, // 底部栏高度（包含安全区域）
       safeAreaBottom: 0, // 底部安全区域高度
-      scenicImage: '/static/images/scenic/badaling.jpg'
+      scenicImage: '/static/images/backgrounds/scenic-default.jpg',
+      paymentMethod: 'wechat' // 默认支付方式
     }
   },
   computed: {
     totalPrice() {
-      return this.unitPrice * this.orderInfo.quantity
+      return this.totalAmount || 0
     }
   },
   onLoad(options) {
@@ -174,9 +206,37 @@ export default {
     this.computeStatusBarHeight();
     
     // 从上一页接收参数
-    if (options.ticketId) {
-      console.log('票型ID:', options.ticketId)
-      // 根据ID获取票型信息
+    if (options.ticketInfo) {
+      try {
+        // 解析票型信息 - 先解码URL编码的字符串
+        const decodedTicketInfo = decodeURIComponent(options.ticketInfo);
+        this.ticketInfo = JSON.parse(decodedTicketInfo);
+        console.log('票型信息:', this.ticketInfo);
+        
+        // 设置总价和数量
+        this.totalAmount = parseFloat(options.totalPrice) || 0;
+        this.totalCount = parseInt(options.totalCount) || 0;
+        
+        // 如果有票型信息，设置订单标题
+        if (this.ticketInfo.length > 0) {
+          // 使用景点名称作为订单标题
+          this.orderInfo.title = this.ticketInfo[0].scenicName || '景点门票';
+          this.orderInfo.quantity = this.totalCount;
+          
+          // 调试信息
+          console.log('设置订单标题:', this.orderInfo.title);
+          console.log('设置订单数量:', this.orderInfo.quantity);
+          console.log('设置总价:', this.totalAmount);
+        }
+      } catch (error) {
+        console.error('解析票型信息失败:', error);
+        uni.showToast({
+          title: '票型信息加载失败',
+          icon: 'none'
+        });
+      }
+    } else {
+      console.warn('没有接收到票型信息');
     }
     
     // 确保静态资源目录存在
@@ -277,35 +337,39 @@ export default {
       this.orderInfo.quantity++
     },
     confirmOrder() {
-      // 显示导航提示
+      // 显示支付确认弹窗
       uni.showModal({
-        title: '导航提示',
-        content: '是否开始导航到景点？',
-        confirmText: '开始导航',
+        title: '确认支付',
+        content: `确认支付¥${this.totalPrice.toFixed(2)}？`,
+        confirmText: '确认支付',
         cancelText: '取消',
         success: (res) => {
           if (res.confirm) {
-            // 模拟导航数据（实际项目中应该从服务器获取）
-            const navData = {
-              id: 'scenic_001',
-              name: '八达岭长城',
-              latitude: 40.359836,
-              longitude: 116.019772,
-              address: '北京市延庆区G6京藏高速58号',
-              type: 'scenic'
-            };
-            
-            // 跳转到地图页面并传递导航数据
-            uni.setStorageSync('navTarget', navData);
-            
-            // 使用switchTab跳转到tabBar页面
-            uni.switchTab({
-              url: '/pages/map/index',
-              success: () => {
-                // 发送事件通知地图页面开始导航
-                uni.$emit('startNavigation', navData);
-              }
+            // 显示支付加载中
+            uni.showLoading({
+              title: '支付处理中',
+              mask: true
             });
+            
+            // 模拟支付过程
+            setTimeout(() => {
+              uni.hideLoading();
+              // 支付成功
+              uni.showToast({
+                title: '支付成功',
+                icon: 'success',
+                duration: 2000,
+                success: () => {
+                  // 延迟导航到订单成功页面
+                  setTimeout(() => {
+                    // 这里可以跳转到订单成功页面
+                    uni.redirectTo({
+                      url: '/pages/order/success?totalPrice=' + this.totalPrice.toFixed(2) + '&orderNo=' + this.orderInfo.orderNo
+                    });
+                  }, 1500);
+                }
+              });
+            }, 1500);
           }
         }
       });
@@ -357,21 +421,36 @@ export default {
     },
     // 检查静态资源目录
     checkStaticResources() {
-      const fs = uni.getFileSystemManager();
-      
+      // 简化资源检查逻辑，使用静态默认图片
       try {
-        // 检查景点图片目录
-        const scenicDir = '/static/images/scenic';
+        // 检测缓存中是否有景点图片URL
+        const cachedImage = uni.getStorageSync('scenicImage');
+        if (cachedImage) {
+          this.scenicImage = cachedImage;
+          console.log('使用缓存的景点图片:', this.scenicImage);
+          return;
+        }
         
-        // 如果存在景点图片，直接使用；否则默认使用本地图片
-        this.scenicImage = '/static/images/scenic/badaling.jpg'; 
-        
-        console.log('景点图片路径:', this.scenicImage);
+        // 使用默认图片
+        this.scenicImage = '/static/images/backgrounds/scenic-default.jpg';
+        console.log('使用默认景点图片:', this.scenicImage);
       } catch (e) {
-        console.error('静态资源检查失败:', e);
-        // 使用默认图片路径
-        this.scenicImage = '/static/images/default-scenic.jpg';
+        console.error('图片资源检查失败:', e);
+        // 出错时使用更可靠的默认图片
+        this.scenicImage = '/static/images/backgrounds/scenic-default.jpg';
       }
+    },
+    formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    },
+    selectPayment(method) {
+      this.paymentMethod = method;
     }
   }
 }
@@ -679,12 +758,55 @@ export default {
             margin-bottom: 8rpx;
           }
           
-          .project-desc {
+          .project-price {
             font-size: 26rpx;
             color: #999;
             line-height: 1.4;
+            display: flex;
+            align-items: baseline;
+            margin: 6rpx 0;
+            
+            .price-symbol {
+              font-size: 24rpx;
+              color: #f56c6c;
+            }
+            
+            text:nth-child(2) {
+              font-size: 28rpx;
+              color: #f56c6c;
+              font-weight: bold;
+              margin: 0 4rpx;
+            }
+            
+            .price-unit {
+              font-size: 24rpx;
+              color: #999;
+              margin-left: 8rpx;
+            }
+          }
+          
+          .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            
+            .tag-item {
+              background-color: rgba(188,143,86,0.1);
+              border-radius: 6rpx;
+              padding: 4rpx 12rpx;
+              margin-right: 10rpx;
+              margin-bottom: 10rpx;
+              font-size: 22rpx;
+              color: #bc8f56;
+            }
           }
         }
+      }
+      
+      .no-items {
+        text-align: center;
+        font-size: 28rpx;
+        color: #999;
+        padding: 30rpx 0;
       }
     }
     
@@ -779,23 +901,22 @@ export default {
       }
     }
     
-    .add-btn {
-      width: 90rpx;
-      height: 90rpx;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #d6a35e, #bc8f56);
+    .pay-btn {
+      width: 240rpx;
+      height: 80rpx;
+      border-radius: 40rpx;
+      background: linear-gradient(135deg, #ff7e2d, #ff4e33);
       color: #fff;
-      font-size: 48rpx;
+      font-size: 30rpx;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4rpx 15rpx rgba(188,143,86,0.4);
+      box-shadow: 0 4rpx 15rpx rgba(255,78,51,0.4);
       transition: all 0.2s ease;
-      border: 4rpx solid rgba(255, 255, 255, 0.5);
       
       &:active {
-        transform: scale(0.9);
-        background: linear-gradient(135deg, #bc8f56, #a87a45);
+        transform: scale(0.95);
+        background: linear-gradient(135deg, #ff4e33, #e54430);
       }
     }
   }
@@ -920,6 +1041,136 @@ export default {
           border-radius: 40rpx;
           text-align: center;
         }
+      }
+    }
+  }
+  
+  /* 订单信息 */
+  .order-info-section {
+    background-color: #fff;
+    border-radius: 16rpx;
+    margin: 20rpx;
+    padding: 20rpx;
+    box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+    
+    .section-title {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20rpx;
+      position: relative;
+      padding-left: 20rpx;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6rpx;
+        height: 30rpx;
+        background-color: #bc8f56;
+        border-radius: 3rpx;
+      }
+    }
+    
+    .order-info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 15rpx 0;
+      border-bottom: 1rpx solid #f5f5f5;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .label {
+        font-size: 28rpx;
+        color: #666;
+      }
+      
+      .value {
+        font-size: 28rpx;
+        color: #333;
+      }
+    }
+  }
+  
+  /* 支付方式 */
+  .payment-section {
+    background-color: #fff;
+    border-radius: 16rpx;
+    margin: 20rpx;
+    padding: 20rpx;
+    box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+    
+    .section-title {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20rpx;
+      position: relative;
+      padding-left: 20rpx;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6rpx;
+        height: 30rpx;
+        background-color: #bc8f56;
+        border-radius: 3rpx;
+      }
+    }
+    
+    .payment-options {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .payment-option {
+      display: flex;
+      align-items: center;
+      padding: 20rpx 0;
+      border-bottom: 1rpx solid #f5f5f5;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &.active {
+        background-color: rgba(188,143,86,0.05);
+      }
+      
+      .payment-icon {
+        width: 80rpx;
+        height: 80rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20rpx;
+        font-size: 40rpx;
+      }
+      
+      .payment-name {
+        flex: 1;
+        font-size: 30rpx;
+        color: #333;
+      }
+      
+      .payment-check {
+        width: 40rpx;
+        height: 40rpx;
+        border-radius: 50%;
+        background-color: #bc8f56;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24rpx;
+        margin-right: 20rpx;
       }
     }
   }
