@@ -1,14 +1,17 @@
 <template>
   <view class="smart-page">
-    <view class="safe-area">
-      <view class="nav-bar">
-        <view class="title">智享夏都</view>
-      </view>
-      
-      <view class="content">
-        <image src="/static/images/backgrounds/bg.jpg" mode="aspectFit" class="placeholder-image"></image>
-        <view class="message">智享夏都页面开发中，敬请期待</view>
-      </view>
+    <!-- 状态栏背景 -->
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    
+    <!-- 导航栏 -->
+    <view class="nav-bar">
+      <view class="title">智享夏都</view>
+    </view>
+    
+    <!-- 内容区域 -->
+    <view class="content">
+      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFit" class="placeholder-image"></image>
+      <view class="message">智享夏都页面开发中，敬请期待</view>
     </view>
   </view>
 </template>
@@ -21,21 +24,15 @@ export default {
     }
   },
   onLoad() {
-    // 获取状态栏高度
     this.computeStatusBarHeight();
   },
   methods: {
-    // 计算状态栏高度
     computeStatusBarHeight() {
       try {
         const systemInfo = uni.getSystemInfoSync();
         console.log('系统信息:', systemInfo);
         this.statusBarHeight = systemInfo.statusBarHeight || 20;
-        
-        // 设置css变量
-        // #ifdef H5
-        document.documentElement.style.setProperty('--status-bar-height', `${this.statusBarHeight}px`);
-        // #endif
+        console.log('状态栏高度:', this.statusBarHeight);
       } catch (e) {
         console.error('获取系统信息失败:', e);
       }
@@ -47,11 +44,15 @@ export default {
 <style lang="scss">
 .smart-page {
   min-height: 100vh;
+  background-color: #F5F5F5;
   
-  .safe-area {
-    padding-top: var(--status-bar-height, 44px); /* 默认安全区域 */
+  /* 状态栏背景 */
+  .status-bar {
+    background-color: #bc8f56;
+    width: 100%;
   }
   
+  /* 导航栏 */
   .nav-bar {
     display: flex;
     align-items: center;
@@ -59,6 +60,7 @@ export default {
     height: 88rpx;
     padding: 0 20rpx;
     background-color: #bc8f56;
+    width: 100%;
     
     .title {
       font-size: 32rpx;
