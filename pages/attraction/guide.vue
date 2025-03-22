@@ -86,90 +86,93 @@
       </view>
     </view>
     
-    <!-- 导览内容 -->
-    <scroll-view class="guide-content" scroll-y>
-      <!-- 景点介绍区 -->
-      <view class="info-card">
-        <view class="info-header">
-          <text class="info-title">景点介绍</text>
-        </view>
-        <view class="info-body">
-          <text class="info-text">{{currentSpot.description}}</text>
-        </view>
-      </view>
-      
-      <!-- 景点图片 -->
-      <scroll-view class="photos-scroll" scroll-x>
-        <view class="photos-container">
-          <view class="photo-item" v-for="(photo, index) in currentSpot.photos" :key="index" @click="previewImage(index)">
-            <image :src="photo" mode="aspectFill" class="spot-photo"></image>
+    <!-- 导览内容区域 -->
+    <scroll-view class="guide-content" scroll-y enable-flex="true" :scroll-anchoring="true" enhanced="true" show-scrollbar="false">
+      <!-- 内容区域容器 -->
+      <view class="content-container">
+        <!-- 景点介绍区 -->
+        <view class="info-card">
+          <view class="info-header">
+            <text class="info-title">景点介绍</text>
+          </view>
+          <view class="info-body">
+            <text class="info-text">{{currentSpot.description}}</text>
           </view>
         </view>
-      </scroll-view>
-      
-      <!-- 历史文化区 -->
-      <view class="info-card">
-        <view class="info-header">
-          <text class="info-title">历史文化</text>
-        </view>
-        <view class="info-body">
-          <text class="info-text">{{currentSpot.history}}</text>
-        </view>
-      </view>
-      
-      <!-- 参观提示区 -->
-      <view class="info-card">
-        <view class="info-header">
-          <text class="info-title">参观提示</text>
-        </view>
-        <view class="info-body">
-          <view class="info-item" v-for="(tip, index) in currentSpot.tips" :key="index">
-            <text class="item-bullet">•</text>
-            <text class="item-text">{{tip}}</text>
+        
+        <!-- 景点图片 -->
+        <scroll-view class="photos-scroll" scroll-x enhanced="true" show-scrollbar="false" :scroll-x="true">
+          <view class="photos-container">
+            <view class="photo-item" v-for="(photo, index) in currentSpot.photos" :key="index" @click="previewImage(index)">
+              <image :src="photo" mode="aspectFill" class="spot-photo"></image>
+            </view>
+          </view>
+        </scroll-view>
+        
+        <!-- 历史文化区 -->
+        <view class="info-card">
+          <view class="info-header">
+            <text class="info-title">历史文化</text>
+          </view>
+          <view class="info-body">
+            <text class="info-text">{{currentSpot.history}}</text>
           </view>
         </view>
-      </view>
-      
-      <!-- 开放信息区 -->
-      <view class="info-card">
-        <view class="info-header">
-          <text class="info-title">开放信息</text>
+        
+        <!-- 参观提示区 -->
+        <view class="info-card">
+          <view class="info-header">
+            <text class="info-title">参观提示</text>
+          </view>
+          <view class="info-body">
+            <view class="info-item" v-for="(tip, index) in currentSpot.tips" :key="index">
+              <text class="item-bullet">•</text>
+              <text class="item-text">{{tip}}</text>
+            </view>
+          </view>
         </view>
-        <view class="info-body">
-          <view class="info-row">
-            <text class="row-label">开放时间：</text>
-            <text class="row-value">{{currentSpot.openTime}}</text>
+        
+        <!-- 开放信息区 -->
+        <view class="info-card">
+          <view class="info-header">
+            <text class="info-title">开放信息</text>
           </view>
-          <view class="info-row">
-            <text class="row-label">门票信息：</text>
-            <text class="row-value">{{currentSpot.ticketInfo}}</text>
+          <view class="info-body">
+            <view class="info-row">
+              <text class="row-label">开放时间：</text>
+              <text class="row-value">{{currentSpot.openTime}}</text>
+            </view>
+            <view class="info-row">
+              <text class="row-label">门票信息：</text>
+              <text class="row-value">{{currentSpot.ticketInfo}}</text>
+            </view>
+            <view class="info-row">
+              <text class="row-label">交通路线：</text>
+              <text class="row-value">{{currentSpot.transport}}</text>
+            </view>
           </view>
-          <view class="info-row">
-            <text class="row-label">交通路线：</text>
-            <text class="row-value">{{currentSpot.transport}}</text>
+        </view>
+        
+        <!-- 底部关联景点 -->
+        <view class="related-spots">
+          <view class="related-header">
+            <text class="related-title">相关景点</text>
+            <text class="view-more">查看更多</text>
           </view>
+          <scroll-view class="related-scroll" scroll-x enhanced="true" show-scrollbar="false">
+            <view 
+              class="related-item" 
+              v-for="(item, index) in relatedSpots" 
+              :key="index"
+              @click="switchSpot(item.id)"
+            >
+              <image :src="item.image" mode="aspectFill" class="related-image"></image>
+              <text class="related-name">{{item.name}}</text>
+            </view>
+          </scroll-view>
         </view>
       </view>
     </scroll-view>
-    
-    <!-- 底部关联景点 -->
-    <view class="related-spots">
-      <view class="related-header">
-        <text class="related-title">相关景点</text>
-        <text class="view-more">查看更多</text>
-      </view>
-      <scroll-view class="related-scroll" scroll-x>
-        <view 
-          class="related-item" 
-          v-for="(item, index) in relatedSpots" 
-          :key="index"
-          @click="switchSpot(item.id)"
-        >
-          <image :src="item.image" mode="aspectFill" class="related-image"></image>
-          <text class="related-name">{{item.name}}</text>
-        </view>
-      </scroll-view>
-    </view>
   </view>
 </template>
 
@@ -783,6 +786,14 @@ export default {
 .guide-content {
   flex: 1;
   padding: 0 20rpx 20rpx;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 30rpx;
 }
 
 .info-card {
@@ -872,6 +883,7 @@ export default {
   .photos-container {
     display: flex;
     padding: 0 10rpx;
+    height: 100%;
     
     .photo-item {
       width: 280rpx;
@@ -879,6 +891,7 @@ export default {
       margin: 0 10rpx;
       border-radius: 12rpx;
       overflow: hidden;
+      flex-shrink: 0;
       
       .spot-photo {
         width: 100%;
@@ -891,7 +904,8 @@ export default {
 .related-spots {
   padding: 20rpx;
   background-color: #fff;
-  margin-bottom: 100rpx;
+  margin-bottom: 30rpx;
+  border-radius: 16rpx;
   
   .related-header {
     display: flex;
@@ -921,6 +935,7 @@ export default {
       display: inline-block;
       width: 200rpx;
       margin-right: 20rpx;
+      flex-shrink: 0;
       
       .related-image {
         width: 200rpx;
