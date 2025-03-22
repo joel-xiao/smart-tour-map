@@ -16,7 +16,7 @@
         <view class="back-btn" @click="goBack">
           <text class="iconfont icon-back"></text>
         </view>
-        <view class="action-btn collect-btn" @click="toggleCollect">
+        <view class="action-btn collect-btn" @click="collectSpot">
           <text class="iconfont" :class="isCollected ? 'icon-star-filled' : 'icon-star'"></text>
         </view>
       </view>
@@ -28,7 +28,7 @@
         </view>
         <view class="spot-location">
           <text class="location-text">{{currentSpot && currentSpot.location ? currentSpot.location : '景区'}}</text>
-          <view class="location-btn" @click="openMap">
+          <view class="location-btn" @click="showMapView">
             <text class="location-icon iconfont icon-map"></text>
             <text class="location-label">导航</text>
           </view>
@@ -38,13 +38,13 @@
     
     <!-- 导览功能 -->
     <view class="guide-features" v-if="currentSpot">
-      <view class="feature-card" @click="toggleAudio">
+      <view class="feature-card" @click="togglePlay">
         <view class="feature-icon">
           <text class="iconfont icon-voice"></text>
         </view>
         <text class="feature-name">语音讲解</text>
       </view>
-      <view class="feature-card" @click="open3DView">
+      <view class="feature-card" @click="togglePanorama">
         <view class="feature-icon">
           <text class="iconfont icon-3d"></text>
         </view>
@@ -210,6 +210,7 @@ export default {
       showMap: false,
       is3DView: false,
       isCollected: false,
+      statusBarHeight: 80, // 添加状态栏高度默认值
       
       // 当前景点信息 - 添加默认值防止空指针
       currentSpot: {
@@ -242,6 +243,9 @@ export default {
     // 错误处理
     try {
       console.log('页面加载参数:', options);
+      
+      // 获取状态栏高度
+      this.getStatusBarHeight();
       
       // 初始化音频上下文
       this.initAudioContext();
@@ -779,6 +783,65 @@ export default {
       // 替换为默认图片
       if (this.currentSpot && this.currentSpot.photos) {
         this.$set(this.currentSpot.photos, index, '/static/images/backgrounds/bg.jpg');
+      }
+    },
+    
+    // 获取状态栏高度
+    getStatusBarHeight() {
+      try {
+        // 获取系统信息
+        const systemInfo = uni.getSystemInfoSync();
+        // 设置状态栏高度
+        this.statusBarHeight = systemInfo.statusBarHeight || 80;
+        console.log('状态栏高度:', this.statusBarHeight);
+      } catch (error) {
+        console.error('获取状态栏高度失败:', error);
+        // 使用默认值
+        this.statusBarHeight = 80;
+      }
+    },
+    
+    // 显示详细介绍
+    showIntroduction() {
+      try {
+        uni.showToast({
+          title: '查看详细介绍',
+          icon: 'none'
+        });
+        // 可以滚动到介绍部分或者创建一个模态框显示详细信息
+      } catch (error) {
+        console.error('显示介绍错误:', error);
+      }
+    },
+    
+    // 显示周边景点
+    showNearbySpots() {
+      try {
+        if (this.relatedSpots && this.relatedSpots.length > 0) {
+          uni.showToast({
+            title: '查看周边景点',
+            icon: 'none'
+          });
+          // 滚动到底部的相关景点部分
+          uni.createSelectorQuery()
+            .select('.related-spots')
+            .boundingClientRect(rect => {
+              if (rect) {
+                uni.pageScrollTo({
+                  scrollTop: rect.top,
+                  duration: 300
+                });
+              }
+            })
+            .exec();
+        } else {
+          uni.showToast({
+            title: '暂无周边景点',
+            icon: 'none'
+          });
+        }
+      } catch (error) {
+        console.error('显示周边景点错误:', error);
       }
     }
   },
