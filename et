@@ -1,0 +1,5 @@
+.gitignore
+project.config.json
+project.private.config.json
+unpackage/dist/cache/.vite/deps/_metadata.json
+unpackage/dist/cache/.vite/deps/package.json
