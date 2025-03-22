@@ -121,8 +121,11 @@
       </view>
     </view>
     
+    <!-- 底部占位，防止内容被底部栏遮挡 -->
+    <view class="bottom-placeholder" :style="{ height: bottomBarHeight + 'px' }"></view>
+    
     <!-- 底部结算栏 -->
-    <view class="bottom-bar">
+    <view class="bottom-bar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
       <view class="total-info">
         <text>合计 Total Amount</text>
         <text class="price">
@@ -155,7 +158,9 @@ export default {
       currentYear: 2025,
       currentMonth: 3,
       selectedDay: 22,
-      daysArray: []
+      daysArray: [],
+      bottomBarHeight: 140, // 底部栏高度（包含安全区域）
+      safeAreaBottom: 0 // 底部安全区域高度
     }
   },
   computed: {
@@ -164,7 +169,7 @@ export default {
     }
   },
   onLoad(options) {
-    // 计算状态栏高度
+    // 计算状态栏高度和安全区域
     this.computeStatusBarHeight();
     
     // 从上一页接收参数
@@ -275,13 +280,30 @@ export default {
         }
       })
     },
-    // 计算状态栏高度
+    // 计算状态栏高度和安全区域
     computeStatusBarHeight() {
       try {
         const systemInfo = uni.getSystemInfoSync();
         console.log('系统信息:', systemInfo);
         this.statusBarHeight = systemInfo.statusBarHeight || 20;
         console.log('状态栏高度:', this.statusBarHeight);
+        
+        // 获取底部安全区域高度（针对iPhone X及以上机型）
+        if (systemInfo.safeAreaInsets) {
+          this.safeAreaBottom = systemInfo.safeAreaInsets.bottom || 0;
+          console.log('底部安全区域高度:', this.safeAreaBottom);
+        } else {
+          // 兼容方法，处理老版本uni-app或无法获取safeAreaInsets的情况
+          const screenHeight = systemInfo.screenHeight;
+          const safeArea = systemInfo.safeArea;
+          if (safeArea && screenHeight) {
+            this.safeAreaBottom = screenHeight - safeArea.bottom;
+            console.log('计算得到的底部安全区域高度:', this.safeAreaBottom);
+          }
+        }
+        
+        // 根据底部安全区域调整底部占位高度
+        this.bottomBarHeight = 100 + this.safeAreaBottom;
       } catch (e) {
         console.error('获取系统信息失败:', e);
       }
@@ -296,6 +318,8 @@ export default {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-bottom: constant(safe-area-inset-bottom); /* iOS 11.0 */
+  padding-bottom: env(safe-area-inset-bottom); /* iOS 11.2+ */
   
   /* 状态栏背景 */
   .status-bar {
@@ -518,6 +542,13 @@ export default {
         border-radius: 8rpx;
       }
     }
+  }
+  
+  /* 底部占位块，防止内容被底部栏遮挡 */
+  .bottom-placeholder {
+    width: 100%;
+    height: 140rpx; /* 默认高度，会被动态计算的高度覆盖 */
+    background-color: transparent;
   }
   
   .bottom-bar {
