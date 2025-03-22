@@ -139,6 +139,15 @@ export default {
     navigateTo(url) {
       // 检查是否为tabBar页面
       if (url.includes('/pages/map/index')) {
+        // 获取当前点击的菜单项
+        const menuItem = this.menuItems.find(item => item.url === url);
+        
+        // 储存用于跳转后选择的分类信息
+        if (menuItem && (menuItem.title === '景点导览' || menuItem.title === '智能导览')) {
+          // 将景点分类索引存储到本地缓存
+          uni.setStorageSync('selectedCategory', 0); // 0通常是景点分类
+        }
+        
         uni.switchTab({
           url: url
         });

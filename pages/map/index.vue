@@ -154,27 +154,24 @@ export default {
     }
   },
   onLoad() {
-    console.log('地图页面加载');
+    this.loadMapConfig();
+    this.computeStatusBarHeight();
+    this.loadStoredState();
     
-    // 初始化地图数据
-    this.loadMarkers();
-    this.loadRoutes();
-    
-    // 默认选中"全部"分类
-    this.currentCatIndex = 0;
-    
-    // 获取系统信息设置导航栏高度
+    // 检查是否有来自首页的分类选择信息
     try {
-      const systemInfo = uni.getSystemInfoSync();
-      console.log('系统信息:', systemInfo);
-      this.statusBarHeight = systemInfo.statusBarHeight || 20;
-      
-      // 设置css变量
-      // #ifdef H5
-      document.documentElement.style.setProperty('--status-bar-height', `${this.statusBarHeight}px`);
-      // #endif
+      const selectedCategory = uni.getStorageSync('selectedCategory');
+      if (selectedCategory !== '' && selectedCategory !== undefined) {
+        console.log('检测到首页传递的分类选择:', selectedCategory);
+        // 延迟执行以确保数据加载完成
+        setTimeout(() => {
+          this.selectCategory(parseInt(selectedCategory));
+          // 清除本地存储的分类信息，避免下次自动跳转
+          uni.removeStorageSync('selectedCategory');
+        }, 500);
+      }
     } catch (e) {
-      console.error('获取系统信息失败:', e);
+      console.error('获取分类选择信息失败:', e);
     }
   },
   methods: {
@@ -828,6 +825,40 @@ export default {
         case 7: return '/static/images/markers/jd.png'; // 其他
         default: return '/static/images/markers/jd.png';
       }
+    },
+    
+    // 加载地图配置
+    loadMapConfig() {
+      console.log('地图页面加载');
+      
+      // 初始化地图数据
+      this.loadMarkers();
+      this.loadRoutes();
+      
+      // 默认选中"全部"分类
+      this.currentCatIndex = 0;
+    },
+    
+    // 计算状态栏高度
+    computeStatusBarHeight() {
+      try {
+        const systemInfo = uni.getSystemInfoSync();
+        console.log('系统信息:', systemInfo);
+        this.statusBarHeight = systemInfo.statusBarHeight || 20;
+        
+        // 设置css变量
+        // #ifdef H5
+        document.documentElement.style.setProperty('--status-bar-height', `${this.statusBarHeight}px`);
+        // #endif
+      } catch (e) {
+        console.error('获取系统信息失败:', e);
+      }
+    },
+    
+    // 加载存储的状态
+    loadStoredState() {
+      // 可以在这里添加加载用户偏好设置、历史记录等功能
+      this.showCategoryMenu = false; // 默认不显示分类菜单
     },
   }
 }
