@@ -15,10 +15,10 @@
     <!-- 轮播图 -->
     <swiper class="banner-swiper" circular :indicator-dots="true" autoplay>
       <swiper-item>
-        <image src="/static/images/backgrounds/default_bg.jpg" mode="aspectFill" class="banner-image"></image>
+        <image src="/static/images/backgrounds/bg.jpg" mode="aspectFill" class="banner-image"></image>
       </swiper-item>
       <swiper-item>
-        <image src="/static/images/backgrounds/default_bg.jpg" mode="aspectFill" class="banner-image"></image>
+        <image src="/static/images/backgrounds/bg.jpg" mode="aspectFill" class="banner-image"></image>
       </swiper-item>
     </swiper>
     

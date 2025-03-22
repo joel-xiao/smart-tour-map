@@ -220,7 +220,7 @@ export default {
         longitude: 115.980,
         latitude: 40.360,
         title: "八达岭长城",
-        iconPath: '/static/images/logos/logo.png',
+        iconPath: '/static/images/backgrounds/bg.jpg',
         width: 32,
         height: 40,
         callout: {
@@ -289,12 +289,12 @@ export default {
           latitude: spot.latitude,
           location: spot.location || '八达岭景区',
           openTime: spot.open_time || '暂无开放时间信息',
-          banner: spot.images && spot.images.length > 0 ? spot.images[0] : '/static/images/logos/logo.png',
+          banner: spot.images && spot.images.length > 0 ? spot.images[0] : '/static/images/backgrounds/bg.jpg',
           description: spot.desc || '暂无描述',
           history: spot.history || '暂无历史信息',
           ticketInfo: spot.ticket_info || '暂无票价信息',
           transport: spot.transport || '暂无交通信息',
-          photos: spot.images || ['/static/images/logos/logo.png', '/static/images/logos/logo.png', '/static/images/logos/logo.png'],
+          photos: spot.images || ['/static/images/backgrounds/bg.jpg', '/static/images/backgrounds/bg.jpg', '/static/images/backgrounds/bg.jpg'],
           tips: spot.tips || ['暂无参观提示'],
           audio: spot.audio || '',
           panoramaId: spot.panorama_id || ''
@@ -323,7 +323,7 @@ export default {
           longitude: this.currentSpot.longitude,
           latitude: this.currentSpot.latitude,
           title: this.currentSpot.name,
-          iconPath: '/static/images/logos/logo.png',
+          iconPath: '/static/images/backgrounds/bg.jpg',
           width: mapConfig.markerStyle.width,
           height: mapConfig.markerStyle.height,
           callout: {
@@ -356,7 +356,7 @@ export default {
           .map(item => ({
             id: item.id,
             name: item.name,
-            image: item.images && item.images.length > 0 ? item.images[0] : '/static/images/logos/logo.png'
+            image: item.images && item.images.length > 0 ? item.images[0] : '/static/images/backgrounds/bg.jpg'
           }));
       }
     },
