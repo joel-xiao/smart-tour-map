@@ -13,6 +13,13 @@
     <view class="content">
       <image src="/static/images/backgrounds/bg.jpg" mode="aspectFit" class="placeholder-image"></image>
       <view class="message">预约页面开发中，敬请期待</view>
+      
+      <!-- 地图导航按钮 -->
+      <button class="nav-btn" @click="navigateToMap">
+        <text class="btn-icon iconfont icon-map"></text>
+        <text class="btn-text">地图导航</text>
+      </button>
+      
       <button class="back-btn" @click="goToHome">返回首页</button>
     </view>
   </view>
@@ -35,6 +42,15 @@ export default {
     goToHome() {
       uni.switchTab({
         url: '/pages/index/index'
+      });
+    },
+    // 跳转到地图导航
+    navigateToMap() {
+      // 存储导航标识，让地图页面知道这是导航模式
+      uni.setStorageSync('mapNavigationMode', true);
+      // 跳转到全域导览页面
+      uni.switchTab({
+        url: '/pages/map/index'
       });
     },
     // 计算状态栏高度
@@ -113,6 +129,24 @@ export default {
       font-size: 32rpx;
       color: #333;
       margin-bottom: 80rpx;
+    }
+    
+    .nav-btn {
+      background-color: #bc8f56;
+      color: #fff;
+      font-size: 30rpx;
+      padding: 20rpx 60rpx;
+      border-radius: 40rpx;
+      margin-bottom: 20rpx;
+      
+      .btn-icon {
+        font-size: 24rpx;
+        margin-right: 10rpx;
+      }
+      
+      .btn-text {
+        font-size: 30rpx;
+      }
     }
     
     .back-btn {

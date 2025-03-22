@@ -167,6 +167,26 @@ export default {
           uni.removeStorageSync('selectedCategory');
         }, 500);
       }
+      
+      // 检查是否是导航模式
+      const isNavigationMode = uni.getStorageSync('mapNavigationMode');
+      if (isNavigationMode) {
+        console.log('检测到导航模式');
+        // 显示导航提示
+        setTimeout(() => {
+          uni.showToast({
+            title: '已进入导航模式，请选择目的地',
+            icon: 'none',
+            duration: 2000
+          });
+          // 显示分类菜单
+          this.showCategoryMenu = true;
+          // 选择交通分类
+          this.selectCategory(3); // 假设索引3是交通分类
+          // 清除本地存储的导航模式标识
+          uni.removeStorageSync('mapNavigationMode');
+        }, 500);
+      }
     } catch (e) {
       console.error('获取分类选择信息失败:', e);
     }
