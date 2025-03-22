@@ -1,7 +1,7 @@
 <template>
   <view class="guide-container">
     <!-- 导览头部 -->
-    <view class="guide-header" :style="{height: '280rpx', paddingTop: '10px'}" v-if="currentSpot">
+    <view class="guide-header" :style="{height: '280rpx', paddingTop: (statusBarHeight + 10) + 'px'}" v-if="currentSpot">
       <image 
         class="spot-banner" 
         :src="currentSpot && currentSpot.banner ? currentSpot.banner : '/static/images/backgrounds/bg.jpg'" 
@@ -12,7 +12,7 @@
       
       <view class="header-mask"></view>
       
-      <view class="header-controls">
+      <view class="header-controls" :style="{top: (statusBarHeight + 10) + 'px'}">
         <view class="back-btn" @click="goBack">
           <text class="iconfont icon-back"></text>
         </view>
@@ -889,22 +889,26 @@ export default {
     left: 20rpx;
     display: flex;
     align-items: center;
+    z-index: 10;
     
     .back-btn {
-      width: 60rpx;
-      height: 60rpx;
+      width: 70rpx;
+      height: 70rpx;
       display: flex;
       align-items: center;
       justify-content: center;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
       
       .iconfont {
         font-size: 40rpx;
+        color: #ffffff;
       }
     }
     
     .action-btn {
-      width: 60rpx;
-      height: 60rpx;
+      width: 70rpx;
+      height: 70rpx;
       border-radius: 50%;
       background-color: var(--primary-color);
       display: flex;
