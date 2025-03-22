@@ -1,6 +1,6 @@
 <template>
   <view class="locate-btn" :class="{ active: isLocated }" @click="locate" @longpress="onLongPress">
-    <image class="icon-image" src="/static/images/icons/target.png"></image>
+    <image class="icon-image" src="/static/images/common/target.png"></image>
     <view class="tooltip" v-if="showTooltip">长按选择位置</view>
   </view>
 </template>

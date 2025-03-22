@@ -14,9 +14,9 @@ export default [
         latitude: 40.360,
         audio: "/static/audio/badaling.mp3",
         images: [
-          "/static/images/logos/logo.png",
-          "/static/images/logos/logo.png",
-          "/static/images/logos/logo.png"
+          "/static/images/common/location.png",
+          "/static/images/common/location.png",
+          "/static/images/common/location.png"
         ],
         desc: "八达岭长城位于北京市延庆区军都山关沟古道北口，是万里长城向游人开放最早的地段，也是明长城中最具代表性的部分，为明代居庸关的重要前哨，海拔高达1015米，地势险要，城关坚固，历来是拱卫京师的军事要塞。",
         history: "八达岭长城始建于明洪武年间（公元1368年—1398年），是明代长城重要关口居庸关的前哨，为京师重要屏障。明长城的建设和修缮基本都集中在嘉靖以前，永乐年间的第二次较大规模修筑，是为嘉靖长城奠定了基础。现存的八达岭长城主要是嘉靖年间重修的（公元1552年前后）。",
@@ -148,9 +148,9 @@ export default [
         latitude: 40.360,
         audio: "/static/audio/badaling.mp3",
         images: [
-          "/static/images/logos/logo.png",
-          "/static/images/logos/logo.png",
-          "/static/images/logos/logo.png"
+          "/static/images/common/location.png",
+          "/static/images/common/location.png",
+          "/static/images/common/location.png"
         ],
         desc: "八达岭长城位于北京市延庆区军都山关沟古道北口，是万里长城向游人开放最早的地段，也是明长城中最具代表性的部分，为明代居庸关的重要前哨，海拔高达1015米，地势险要，城关坚固，历来是拱卫京师的军事要塞。",
         history: "八达岭长城始建于明洪武年间（公元1368年—1398年），是明代长城重要关口居庸关的前哨，为京师重要屏障。明长城的建设和修缮基本都集中在嘉靖以前，永乐年间的第二次较大规模修筑，是为嘉靖长城奠定了基础。现存的八达岭长城主要是嘉靖年间重修的（公元1552年前后）。",

@@ -1,7 +1,7 @@
 <template>
   <view class="category-menu">
     <view class="menu-item" @click="toggleCats">
-      <image class="icon-image" src="/static/images/icons/park.png"></image>
+      <image class="icon-image" src="/static/images/common/park.png"></image>
       <view class="category-panel" :class="{hide: !showCats}">
         <view 
           v-for="(item, index) in categories" 

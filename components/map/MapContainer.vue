@@ -339,7 +339,7 @@ export default {
               width: point.width || mapConfig.markerStyle.width,
               height: point.height || mapConfig.markerStyle.height,
               anchor: { x: 16, y: 32 },
-              src: point.iconPath || '/static/images/markers/jd.png'
+              src: point.iconPath || '/static/images/common/location.png'
             });
             
             // 添加标记数据
@@ -469,7 +469,7 @@ export default {
               extData: { id: point.id || index, data: point },
               icon: new AMap.Icon({
                 size: new AMap.Size(40, 40),
-                image: point.iconPath || '/static/images/markers/jd.png',
+                image: point.iconPath || '/static/images/common/location.png',
                 imageSize: new AMap.Size(40, 40)
               })
             });

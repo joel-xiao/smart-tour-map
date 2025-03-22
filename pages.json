@@ -86,26 +86,26 @@
 			{
 				"pagePath": "pages/index/index",
 				"text": "首页",
-				"iconPath": "static/images/logos/logo.png",
-				"selectedIconPath": "static/images/logos/logo.png"
+				"iconPath": "static/images/ui/guide_unselect.png",
+				"selectedIconPath": "static/images/ui/guide_select.png"
 			},
 			{
 				"pagePath": "pages/map/index",
 				"text": "全域导览",
-				"iconPath": "static/images/logos/logo.png",
-				"selectedIconPath": "static/images/logos/logo.png"
+				"iconPath": "static/images/ui/map_unselect.png",
+				"selectedIconPath": "static/images/ui/map_select.png"
 			},
 			{
 				"pagePath": "pages/smart/index",
 				"text": "智享服务",
-				"iconPath": "static/images/logos/logo.png",
-				"selectedIconPath": "static/images/logos/logo.png"
+				"iconPath": "static/images/ui/chat_unselect.png",
+				"selectedIconPath": "static/images/ui/chat_select.png"
 			},
 			{
 				"pagePath": "pages/user/index",
 				"text": "我的",
-				"iconPath": "static/images/logos/logo.png",
-				"selectedIconPath": "static/images/logos/logo.png"
+				"iconPath": "static/images/ui/my_unselect.png",
+				"selectedIconPath": "static/images/ui/my_select.png"
 			}
 		]
 	},
