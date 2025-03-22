@@ -223,28 +223,28 @@ export default {
             // 根据marker.icon属性选择合适的图标
             switch(marker.icon) {
               case 'attraction':
-                marker.iconPath = '/static/images/common/location.png';
+                marker.iconPath = '/static/images/markers/jd.png';
                 break;
               case 'hotel':
-                marker.iconPath = '/static/images/common/location.png';
+                marker.iconPath = '/static/images/markers/jxl.png';
                 break;
               case 'food':
-                marker.iconPath = '/static/images/common/location.png';
+                marker.iconPath = '/static/images/markers/shfw.png';
                 break;
               case 'entrance':
-                marker.iconPath = '/static/images/common/location.png';
+                marker.iconPath = '/static/images/markers/jt.png';
                 break;
               case 'shop':
-                marker.iconPath = '/static/images/common/location.png';
+                marker.iconPath = '/static/images/markers/xsss.png';
                 break;
               case 'attraction@1.1':
-                marker.iconPath = '/static/images/common/location.png';
+                marker.iconPath = '/static/images/markers/tycs.png';
                 break;
               case 'attraction@1.2':
-                marker.iconPath = '/static/images/common/location.png';
+                marker.iconPath = '/static/images/markers/climb.png';
                 break;
               default:
-                marker.iconPath = '/static/images/common/location.png';
+                marker.iconPath = '/static/images/markers/jd.png';
             }
             
             // 设置标记点大小
@@ -423,33 +423,33 @@ export default {
       // 更新地图中的路线标记点
       this.markers = this.routes[index].data.map(point => {
         // 确保标记点有正确的图标
-        let iconPath = '/static/images/common/location.png';
+        let iconPath = '/static/images/markers/jd.png';
         
         // 根据point.icon属性选择合适的图标
         switch(point.icon) {
           case 'attraction':
-            iconPath = '/static/images/common/location.png';
+            iconPath = '/static/images/markers/jd.png';
             break;
           case 'hotel':
-            iconPath = '/static/images/common/location.png';
+            iconPath = '/static/images/markers/jxl.png';
             break;
           case 'food':
-            iconPath = '/static/images/common/location.png';
+            iconPath = '/static/images/markers/shfw.png';
             break;
           case 'entrance':
-            iconPath = '/static/images/common/location.png';
+            iconPath = '/static/images/markers/jt.png';
             break;
           case 'shop':
-            iconPath = '/static/images/common/location.png';
+            iconPath = '/static/images/markers/xsss.png';
             break;
           case 'attraction@1.1':
-            iconPath = '/static/images/common/location.png';
+            iconPath = '/static/images/markers/tycs.png';
             break;
           case 'attraction@1.2':
-            iconPath = '/static/images/common/location.png';
+            iconPath = '/static/images/markers/climb.png';
             break;
           default:
-            iconPath = '/static/images/common/location.png';
+            iconPath = '/static/images/markers/jd.png';
         }
         
         return {
@@ -800,33 +800,33 @@ export default {
         // 根据分类的 icon 属性返回对应图标
         switch(category.icon) {
           case 'all':
-            return '/static/images/common/location.png';
+            return '/static/images/markers/jd.png';
           case 'attraction':
-            return '/static/images/common/location.png';
+            return '/static/images/markers/jd.png';
           case 'hotel':
-            return '/static/images/common/location.png';
+            return '/static/images/markers/jxl.png';
           case 'food':
-            return '/static/images/common/location.png';
+            return '/static/images/markers/shfw.png';
           case 'entrance':
-            return '/static/images/common/location.png';
+            return '/static/images/markers/jt.png';
           case 'shop':
-            return '/static/images/common/location.png';
+            return '/static/images/markers/xsss.png';
           default:
-            return '/static/images/common/location.png';
+            return '/static/images/markers/jd.png';
         }
       }
       
       // 默认图标映射
       switch(index) {
-        case 0: return '/static/images/common/location.png'; // 全部
-        case 1: return '/static/images/common/location.png'; // 景点
-        case 2: return '/static/images/common/location.png'; // 住宿
-        case 3: return '/static/images/common/location.png'; // 餐饮
-        case 4: return '/static/images/common/location.png'; // 交通
-        case 5: return '/static/images/common/location.png'; // 购物
-        case 6: return '/static/images/common/location.png'; // 体育场馆
-        case 7: return '/static/images/common/location.png'; // 其他
-        default: return '/static/images/common/location.png';
+        case 0: return '/static/images/markers/jd.png'; // 全部
+        case 1: return '/static/images/markers/jd.png'; // 景点
+        case 2: return '/static/images/markers/jxl.png'; // 住宿
+        case 3: return '/static/images/markers/shfw.png'; // 餐饮
+        case 4: return '/static/images/markers/jt.png'; // 交通
+        case 5: return '/static/images/markers/xsss.png'; // 购物
+        case 6: return '/static/images/markers/tycs.png'; // 体育场馆
+        case 7: return '/static/images/markers/jd.png'; // 其他
+        default: return '/static/images/markers/jd.png';
       }
     },
   }
