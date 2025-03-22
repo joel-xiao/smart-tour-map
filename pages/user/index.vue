@@ -57,7 +57,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 88rpx;
+    height: 80rpx;
     padding: 0 20rpx;
     background-color: #bc8f56;
     width: 100%;
@@ -71,6 +71,7 @@ export default {
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
+      top: -5rpx;
     }
   }
   
