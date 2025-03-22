@@ -294,7 +294,37 @@ export default {
   },
   methods: {
     goBack() {
-      uni.navigateBack();
+      console.log('点击返回按钮');
+      try {
+        uni.navigateBack({
+          success: () => {
+            console.log('返回上一页成功');
+          },
+          fail: (err) => {
+            console.error('返回上一页失败:', err);
+            // 备用方法 - 如果返回失败，尝试导航到地图页
+            uni.switchTab({
+              url: '/pages/map/index',
+              success: () => {
+                console.log('导航到地图页成功');
+              },
+              fail: (navErr) => {
+                console.error('导航到地图页失败:', navErr);
+                // 最后的备用方案
+                uni.reLaunch({
+                  url: '/pages/index/index'
+                });
+              }
+            });
+          }
+        });
+      } catch (error) {
+        console.error('返回操作异常:', error);
+        // 捕获到异常时，尝试重定向到首页
+        uni.reLaunch({
+          url: '/pages/index/index'
+        });
+      }
     },
     
     // 加载景点数据
