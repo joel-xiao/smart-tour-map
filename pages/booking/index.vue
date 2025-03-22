@@ -8,7 +8,7 @@
     </view>
     
     <view class="content">
-      <image src="/static/images/logos/logo.png" mode="aspectFit" class="placeholder-image"></image>
+      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFit" class="placeholder-image"></image>
       <view class="message">预约页面开发中，敬请期待</view>
       <button class="back-btn" @click="goToHome">返回首页</button>
     </view>

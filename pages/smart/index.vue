@@ -5,7 +5,7 @@
     </view>
     
     <view class="content">
-      <image src="/static/images/logos/logo.png" mode="aspectFit" class="placeholder-image"></image>
+      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFit" class="placeholder-image"></image>
       <view class="message">智享夏都页面开发中，敬请期待</view>
     </view>
   </view>

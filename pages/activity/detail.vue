@@ -8,7 +8,7 @@
     </view>
     
     <view class="content">
-      <image src="/static/images/logos/logo.png" mode="aspectFit" class="activity-banner"></image>
+      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFit" class="activity-banner"></image>
       <view class="activity-title">八达岭少年使者</view>
       <view class="activity-desc">
         <view class="desc-item">

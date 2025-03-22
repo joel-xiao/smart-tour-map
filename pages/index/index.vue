@@ -2,7 +2,7 @@
   <view class="homepage">
     <!-- 顶部宣传图 -->
     <view class="header-image">
-      <image src="/static/images/logos/logo.png" mode="aspectFill" class="main-image"></image>
+      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFill" class="main-image"></image>
       <view class="header-text">
         <text class="main-title">智游地图</text>
         <text class="sub-title">景区智能导览服务</text>
@@ -25,7 +25,7 @@
     
     <!-- 预约通道 -->
     <view class="booking-channel" @click="navigateToBooking">
-      <image src="/static/images/logos/logo.png" mode="aspectFill" class="booking-bg"></image>
+      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFill" class="booking-bg"></image>
       <view class="booking-text">
         <text class="booking-title">景区门票</text>
         <text class="booking-desc">预约通道 >></text>
@@ -39,7 +39,7 @@
     </view>
     
     <view class="activity-card" @click="navigateToActivity">
-      <image src="/static/images/logos/logo.png" mode="aspectFill" class="activity-image"></image>
+      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFill" class="activity-image"></image>
       <view class="activity-overlay">
         <text class="activity-title">景区特色活动</text>
       </view>
@@ -107,19 +107,19 @@ export default {
           id: 1,
           name: '景点一号',
           desc: '精彩景点描述内容',
-          image: '/static/images/logos/logo.png'
+          image: '/static/images/backgrounds/bg.jpg'
         },
         {
           id: 2,
           name: '景点二号',
           desc: '精彩景点描述内容',
-          image: '/static/images/logos/logo.png'
+          image: '/static/images/backgrounds/bg.jpg'
         },
         {
           id: 3,
           name: '景点三号',
           desc: '精彩景点描述内容',
-          image: '/static/images/logos/logo.png'
+          image: '/static/images/backgrounds/bg.jpg'
         }
       ]
     }
