@@ -1,72 +1,82 @@
 <template>
   <view class="guide-container">
-    <!-- 顶部导航栏 -->
-    <view class="nav-bar">
-      <view class="back-btn" @click="goBack">
-        <text class="iconfont icon-back"></text>
+    <!-- 导览头部 -->
+    <view class="guide-header" :style="{height: statusBarHeight + 'px', paddingTop: '10px'}" v-if="currentSpot">
+      <image 
+        class="spot-banner" 
+        :src="currentSpot && currentSpot.banner ? currentSpot.banner : '/static/images/backgrounds/bg.jpg'" 
+        mode="aspectFill" 
+        @error="() => { currentSpot.banner = '/static/images/backgrounds/bg.jpg' }"
+      >
+      </image>
+      
+      <view class="header-mask"></view>
+      
+      <view class="header-controls">
+        <view class="back-btn" @click="goBack">
+          <text class="iconfont icon-back"></text>
+        </view>
+        <view class="action-btn collect-btn" @click="toggleCollect">
+          <text class="iconfont" :class="isCollected ? 'icon-star-filled' : 'icon-star'"></text>
+        </view>
       </view>
-      <text class="title">景点导览</text>
+      
+      <view class="header-info">
+        <view class="spot-info">
+          <text class="spot-name">{{currentSpot && currentSpot.name ? currentSpot.name : '景点'}}</text>
+          <text class="spot-tag">{{currentSpot && currentSpot.tag ? currentSpot.tag : '景点'}}</text>
+        </view>
+        <view class="spot-location">
+          <text class="location-text">{{currentSpot && currentSpot.location ? currentSpot.location : '景区'}}</text>
+          <view class="location-btn" @click="openMap">
+            <text class="location-icon iconfont icon-map"></text>
+            <text class="location-label">导航</text>
+          </view>
+        </view>
+      </view>
     </view>
     
-    <!-- 景点大图 -->
-    <view class="spot-banner" v-if="currentSpot && currentSpot.banner">
-      <image :src="currentSpot.banner" mode="aspectFill" class="banner-image"></image>
-      <view class="banner-info">
-        <text class="banner-title">{{currentSpot.name}}</text>
-        <text class="banner-tag">{{currentSpot.tag}}</text>
-      </view>
-    </view>
-    <!-- 备用显示 -->
-    <view class="spot-banner" v-else>
-      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFill" class="banner-image"></image>
-      <view class="banner-info">
-        <text class="banner-title">{{currentSpot ? currentSpot.name : '景点'}}</text>
-        <text class="banner-tag">{{currentSpot ? currentSpot.tag : '景点'}}</text>
-      </view>
-    </view>
-    
-    <!-- 导览功能区 -->
+    <!-- 导览功能 -->
     <view class="guide-features" v-if="currentSpot">
-      <view class="feature-item" @click="showMapView">
+      <view class="feature-card" @click="toggleAudio">
         <view class="feature-icon">
-          <text class="iconfont icon-location"></text>
+          <text class="iconfont icon-voice"></text>
         </view>
-        <text class="feature-text">位置导航</text>
+        <text class="feature-name">语音讲解</text>
       </view>
-      <view class="feature-item" @click="toggle3DView">
+      <view class="feature-card" @click="open3DView">
         <view class="feature-icon">
-          <text class="iconfont" :class="is3DView ? 'icon-3d' : 'icon-2d'"></text>
+          <text class="iconfont icon-3d"></text>
         </view>
-        <text class="feature-text">{{is3DView ? '3D景观' : '2D导览'}}</text>
+        <text class="feature-name">全景查看</text>
       </view>
-      <view class="feature-item" @click="togglePanorama">
+      <view class="feature-card" @click="showIntroduction">
         <view class="feature-icon">
-          <text class="iconfont icon-panorama"></text>
+          <text class="iconfont icon-info"></text>
         </view>
-        <text class="feature-text">全景体验</text>
+        <text class="feature-name">详细介绍</text>
       </view>
-      <view class="feature-item" @click="collectSpot">
-        <view class="feature-icon" :class="{active: isCollected}">
-          <text class="iconfont icon-collect"></text>
+      <view class="feature-card" @click="showNearbySpots">
+        <view class="feature-icon">
+          <text class="iconfont icon-nearby"></text>
         </view>
-        <text class="feature-text">收藏</text>
+        <text class="feature-name">周边景点</text>
       </view>
     </view>
     
-    <!-- 语音导览控制栏 -->
-    <view class="audio-control" v-if="currentSpot">
-      <view class="audio-btn" @click="togglePlay">
-        <text class="iconfont" :class="isPlaying ? 'icon-close' : 'icon-right'"></text>
-      </view>
-      <view class="audio-info">
-        <text class="audio-title">{{currentSpot.name}}景点语音导览</text>
+    <!-- 音频控制 -->
+    <view class="audio-control" v-if="isPlaying && currentSpot">
+      <view class="audio-progress">
+        <view class="progress-bar">
+          <view class="progress-filled" :style="{width: audioProgress + '%'}"></view>
+        </view>
         <slider 
-          class="audio-progress" 
+          class="progress-slider" 
           :value="audioProgress" 
-          :max="100"
-          @change="onSliderChange"
-          activeColor="#bc8f56"
-          backgroundColor="#e0e0e0"
+          @change="seekAudio" 
+          min="0" 
+          max="100" 
+          show-value
           block-size="20"
         />
       </view>
@@ -263,9 +273,17 @@ export default {
       
       // 加载景点数据
       if (options && options.id) {
-        this.spotId = parseInt(options.id);
-        this.loadSpotData(this.spotId);
+        // 确保options.id是有效的数值
+        const id = parseInt(options.id);
+        if (!isNaN(id) && id > 0) {
+          this.spotId = id;
+          this.loadSpotData(this.spotId);
+        } else {
+          console.warn('无效的景点ID:', options.id);
+          this.loadSpotData(1); // 加载默认景点
+        }
       } else {
+        console.log('未提供景点ID，加载默认景点');
         // 默认加载景点
         this.loadSpotData(1);
       }
@@ -282,10 +300,21 @@ export default {
     // 加载景点数据
     loadSpotData(id) {
       try {
-        if (!id) {
-          console.error('loadSpotData: id参数为空');
-          return;
+        // 增强参数验证
+        if (!id || isNaN(parseInt(id)) || parseInt(id) <= 0) {
+          console.error('loadSpotData: id参数无效:', id);
+          // 显示错误提示
+          uni.showToast({
+            title: '景点ID无效',
+            icon: 'none'
+          });
+          // 使用默认ID
+          id = 1;
+          console.log('使用默认景点ID:', id);
         }
+        
+        // 确保id是数字类型
+        id = parseInt(id);
         
         console.log('开始加载景点数据, id:', id);
         // 显示加载中
@@ -320,7 +349,13 @@ export default {
             icon: 'none'
           });
           
-          // 保持当前景点不变
+          // 保持当前景点不变，或尝试加载默认景点
+          if (id !== 1 && !this.currentSpot.id) {
+            console.log('尝试加载默认景点');
+            setTimeout(() => {
+              this.loadSpotData(1);
+            }, 1000);
+          }
           return;
         }
         
@@ -735,69 +770,112 @@ export default {
   background-color: var(--bg-color);
 }
 
-.nav-bar {
-  height: 90rpx;
-  background-color: var(--primary-color);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  padding: 0 20rpx;
+.guide-header {
   position: relative;
-  z-index: 100;
+  height: 380rpx;
+  overflow: hidden;
   
-  .back-btn {
-    width: 60rpx;
-    height: 60rpx;
+  .spot-banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .header-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .header-controls {
+    position: absolute;
+    top: 20rpx;
+    left: 20rpx;
     display: flex;
     align-items: center;
-    justify-content: center;
     
-    .iconfont {
-      font-size: 40rpx;
+    .back-btn {
+      width: 60rpx;
+      height: 60rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .iconfont {
+        font-size: 40rpx;
+      }
+    }
+    
+    .action-btn {
+      width: 60rpx;
+      height: 60rpx;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 20rpx;
+      
+      .iconfont {
+        color: #fff;
+        font-size: 32rpx;
+      }
     }
   }
   
-  .title {
-    position: absolute;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 36rpx;
-    font-weight: bold;
-  }
-}
-
-.spot-banner {
-  position: relative;
-  height: 380rpx;
-  
-  .banner-image {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .banner-info {
+  .header-info {
     position: absolute;
     left: 30rpx;
     bottom: 30rpx;
     display: flex;
     flex-direction: column;
     
-    .banner-title {
-      font-size: 40rpx;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
-      margin-bottom: 10rpx;
+    .spot-info {
+      .spot-name {
+        font-size: 40rpx;
+        font-weight: bold;
+        color: #fff;
+        text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
+        margin-bottom: 10rpx;
+      }
+      
+      .spot-tag {
+        font-size: 24rpx;
+        color: #fff;
+        background-color: rgba(188, 143, 86, 0.8);
+        padding: 4rpx 16rpx;
+        border-radius: 20rpx;
+        width: fit-content;
+      }
     }
     
-    .banner-tag {
-      font-size: 24rpx;
-      color: #fff;
-      background-color: rgba(188, 143, 86, 0.8);
-      padding: 4rpx 16rpx;
-      border-radius: 20rpx;
-      width: fit-content;
+    .spot-location {
+      display: flex;
+      align-items: center;
+      
+      .location-text {
+        font-size: 24rpx;
+        color: #fff;
+        margin-right: 20rpx;
+      }
+      
+      .location-btn {
+        display: flex;
+        align-items: center;
+        
+        .location-icon {
+          font-size: 32rpx;
+          color: #fff;
+        }
+        
+        .location-label {
+          font-size: 24rpx;
+          color: #fff;
+        }
+      }
     }
   }
 }
@@ -809,7 +887,7 @@ export default {
   background-color: #fff;
   margin-bottom: 20rpx;
   
-  .feature-item {
+  .feature-card {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -824,21 +902,13 @@ export default {
       justify-content: center;
       margin-bottom: 10rpx;
       
-      &.active {
-        background-color: var(--primary-color);
-        
-        .iconfont {
-          color: #fff;
-        }
-      }
-      
       .iconfont {
         font-size: 36rpx;
         color: #666;
       }
     }
     
-    .feature-text {
+    .feature-name {
       font-size: 24rpx;
       color: #666;
     }
@@ -852,34 +922,25 @@ export default {
   background-color: #fff;
   margin-bottom: 20rpx;
   
-  .audio-btn {
-    width: 60rpx;
-    height: 60rpx;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 20rpx;
-    
-    .iconfont {
-      color: #fff;
-      font-size: 32rpx;
-    }
-  }
-  
-  .audio-info {
+  .audio-progress {
     flex: 1;
     display: flex;
     flex-direction: column;
     
-    .audio-title {
-      font-size: 26rpx;
-      color: #333;
-      margin-bottom: 10rpx;
+    .progress-bar {
+      width: 100%;
+      height: 20rpx;
+      background-color: #f5f5f5;
+      border-radius: 10rpx;
+      overflow: hidden;
+      
+      .progress-filled {
+        height: 100%;
+        background-color: var(--primary-color);
+      }
     }
     
-    .audio-progress {
+    .progress-slider {
       width: 100%;
     }
   }
