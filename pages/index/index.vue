@@ -347,6 +347,7 @@ export default {
 
 .attraction-list {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   margin: 0 20rpx;
   
@@ -356,6 +357,7 @@ export default {
     border-radius: 16rpx;
     overflow: hidden;
     box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.1);
+    margin-bottom: 20rpx;
     
     .attraction-image {
       width: 100%;
@@ -369,11 +371,13 @@ export default {
         font-size: 28rpx;
         color: #333;
         font-weight: bold;
+        margin-bottom: 8rpx;
       }
       
       .attraction-desc {
         font-size: 22rpx;
         color: #666;
+        line-height: 1.4;
       }
     }
   }
