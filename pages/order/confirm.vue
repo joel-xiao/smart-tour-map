@@ -61,6 +61,10 @@
         <view class="image-overlay"></view>
         <view class="image-title">
           <text>{{orderInfo.title}}</text>
+          <view class="location-tag" @click="navigateToMap">
+            <text class="iconfont icon-location"></text>
+            <text>导航到景点</text>
+          </view>
         </view>
       </view>
       
@@ -79,48 +83,40 @@
         </view>
       </view>
       
-      <!-- 数量选择 -->
-      <view class="info-section">
-        <view class="info-title">
-          <text>数量 Qty</text>
-        </view>
-        <view class="quantity-selector">
-          <view class="decrease-btn" @click="decreaseQty">
-            <text>-</text>
-          </view>
-          <text class="quantity">{{orderInfo.quantity}}</text>
-          <view class="increase-btn" @click="increaseQty">
-            <text>+</text>
-          </view>
-        </view>
-      </view>
-      
       <!-- 票种信息 -->
-      <view class="ticket-item">
-        <view class="ticket-name">缆车双程票</view>
-        <text class="ticket-count">X{{orderInfo.quantity}}</text>
-        <view class="ticket-date">
-          <text>游玩日期 Travel Date</text>
-          <text class="date-value">{{orderInfo.date}}</text>
+      <view class="project-list">
+        <view class="section-title">
+          <text>项目列表</text>
+        </view>
+        
+        <view class="project-item">
+          <view class="project-icon">
+            <text class="iconfont icon-ticket"></text>
+          </view>
+          <view class="project-info">
+            <view class="project-name">缆车双程票</view>
+            <view class="project-desc">可乘坐缆车往返八达岭长城脚下至长城上</view>
+          </view>
+        </view>
+        
+        <view class="project-item">
+          <view class="project-icon">
+            <text class="iconfont icon-ticket"></text>
+          </view>
+          <view class="project-info">
+            <view class="project-name">成人票</view>
+            <view class="project-desc">八达岭长城景区门票（淡季）</view>
+          </view>
         </view>
       </view>
       
-      <view class="ticket-item">
-        <view class="ticket-name">成人票</view>
-        <text class="ticket-count">X{{orderInfo.quantity}}</text>
-        <view class="ticket-date">
-          <text>游玩日期 Travel Date</text>
-          <text class="date-value">{{orderInfo.date}}</text>
+      <!-- 景点描述 -->
+      <view class="scenic-desc">
+        <view class="section-title">
+          <text>景点介绍</text>
         </view>
-      </view>
-      
-      <!-- 预约时间选择 -->
-      <view class="booking-time">
-        <view class="info-title">
-          <text>请选择预约时间 Booking Time</text>
-        </view>
-        <view class="time-unavailable">
-          <text>当前日期无可售时段</text>
+        <view class="desc-content">
+          <text>八达岭长城是万里长城向游人开放最早的地段，也是最具代表性的一段，是明长城的一个隘口。居庸关外古长城连绵群山之中，为京北重要关口。八达岭长城为居庸关的重要前哨，古称"居庸之险不在关而在八达岭"。明朝初年开始了以八达岭为中心的长城修筑，而现在所看到的八达岭长城多为明代中期所修。</text>
         </view>
       </view>
     </view>
@@ -131,7 +127,7 @@
     <!-- 底部结算栏 -->
     <view class="bottom-bar" :style="{ paddingBottom: safeAreaBottom + 'px' }">
       <view class="total-info">
-        <text>合计 Total Amount</text>
+        <text>景点门票 Ticket</text>
         <text class="price">
           <text class="symbol">¥</text>
           <text class="amount">{{totalPrice.toFixed(2)}}</text>
@@ -521,6 +517,27 @@ export default {
           line-height: 1.4;
           text-shadow: 0 1rpx 3rpx rgba(0,0,0,0.5);
         }
+        
+        .location-tag {
+          display: inline-flex;
+          align-items: center;
+          background-color: rgba(255, 255, 255, 0.3);
+          border-radius: 30rpx;
+          padding: 8rpx 16rpx;
+          margin-top: 16rpx;
+          backdrop-filter: blur(5rpx);
+          
+          .iconfont {
+            font-size: 24rpx;
+            color: #fff;
+            margin-right: 6rpx;
+          }
+          
+          text:last-child {
+            font-size: 24rpx;
+            font-weight: normal;
+          }
+        }
       }
     }
     
@@ -598,32 +615,112 @@ export default {
       }
     }
     
-    .ticket-item {
+    .project-list {
+      background-color: #fff;
+      border-radius: 16rpx;
+      margin: 20rpx;
       padding: 20rpx;
-      border-bottom: 1rpx solid #f5f5f5;
+      box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
       
-      .ticket-name {
-        font-size: 30rpx;
+      .section-title {
+        font-size: 32rpx;
+        font-weight: bold;
         color: #333;
-        margin-bottom: 10rpx;
-      }
-      
-      .ticket-count {
-        font-size: 28rpx;
-        color: #bc8f56;
-        margin-bottom: 15rpx;
-        display: block;
-      }
-      
-      .ticket-date {
-        display: flex;
-        justify-content: space-between;
-        font-size: 26rpx;
-        color: #999;
+        margin-bottom: 20rpx;
+        position: relative;
+        padding-left: 20rpx;
         
-        .date-value {
-          color: #666;
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 6rpx;
+          height: 30rpx;
+          background-color: #bc8f56;
+          border-radius: 3rpx;
         }
+      }
+      
+      .project-item {
+        display: flex;
+        align-items: center;
+        padding: 20rpx 0;
+        border-bottom: 1rpx solid #f5f5f5;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        .project-icon {
+          width: 80rpx;
+          height: 80rpx;
+          border-radius: 40rpx;
+          background-color: rgba(188,143,86,0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 20rpx;
+          
+          .iconfont {
+            font-size: 40rpx;
+            color: #bc8f56;
+          }
+        }
+        
+        .project-info {
+          flex: 1;
+          
+          .project-name {
+            font-size: 30rpx;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 8rpx;
+          }
+          
+          .project-desc {
+            font-size: 26rpx;
+            color: #999;
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+    
+    .scenic-desc {
+      background-color: #fff;
+      border-radius: 16rpx;
+      margin: 0 20rpx 20rpx;
+      padding: 20rpx;
+      box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+      
+      .section-title {
+        font-size: 32rpx;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20rpx;
+        position: relative;
+        padding-left: 20rpx;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 6rpx;
+          height: 30rpx;
+          background-color: #bc8f56;
+          border-radius: 3rpx;
+        }
+      }
+      
+      .desc-content {
+        font-size: 28rpx;
+        color: #666;
+        line-height: 1.6;
+        text-align: justify;
       }
     }
     
@@ -683,16 +780,23 @@ export default {
     }
     
     .add-btn {
-      width: 80rpx;
-      height: 80rpx;
+      width: 90rpx;
+      height: 90rpx;
       border-radius: 50%;
-      background-color: #bc8f56;
+      background: linear-gradient(135deg, #d6a35e, #bc8f56);
       color: #fff;
       font-size: 48rpx;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2rpx 10rpx rgba(188,143,86,0.4);
+      box-shadow: 0 4rpx 15rpx rgba(188,143,86,0.4);
+      transition: all 0.2s ease;
+      border: 4rpx solid rgba(255, 255, 255, 0.5);
+      
+      &:active {
+        transform: scale(0.9);
+        background: linear-gradient(135deg, #bc8f56, #a87a45);
+      }
     }
   }
   
