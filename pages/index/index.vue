@@ -137,9 +137,16 @@ export default {
     },
     // 导航到指定页面
     navigateTo(url) {
-      uni.navigateTo({
-        url: url
-      });
+      // 检查是否为tabBar页面
+      if (url.includes('/pages/map/index')) {
+        uni.switchTab({
+          url: url
+        });
+      } else {
+        uni.navigateTo({
+          url: url
+        });
+      }
     },
     // 导航到预约页面
     navigateToBooking() {
