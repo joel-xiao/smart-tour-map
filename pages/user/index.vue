@@ -1,12 +1,14 @@
 <template>
   <view class="user-page">
-    <view class="nav-bar">
-      <view class="title">我的</view>
-    </view>
-    
-    <view class="content">
-      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFit" class="placeholder-image"></image>
-      <view class="message">个人中心页面开发中，敬请期待</view>
+    <view class="safe-area">
+      <view class="nav-bar">
+        <view class="title">我的</view>
+      </view>
+      
+      <view class="content">
+        <image src="/static/images/backgrounds/bg.jpg" mode="aspectFit" class="placeholder-image"></image>
+        <view class="message">个人中心页面开发中，敬请期待</view>
+      </view>
     </view>
   </view>
 </template>
@@ -14,9 +16,31 @@
 <script>
 export default {
   data() {
-    return {}
+    return {
+      statusBarHeight: 20
+    }
   },
-  methods: {}
+  onLoad() {
+    // 获取状态栏高度
+    this.computeStatusBarHeight();
+  },
+  methods: {
+    // 计算状态栏高度
+    computeStatusBarHeight() {
+      try {
+        const systemInfo = uni.getSystemInfoSync();
+        console.log('系统信息:', systemInfo);
+        this.statusBarHeight = systemInfo.statusBarHeight || 20;
+        
+        // 设置css变量
+        // #ifdef H5
+        document.documentElement.style.setProperty('--status-bar-height', `${this.statusBarHeight}px`);
+        // #endif
+      } catch (e) {
+        console.error('获取系统信息失败:', e);
+      }
+    }
+  }
 }
 </script>
 
@@ -24,13 +48,16 @@ export default {
 .user-page {
   min-height: 100vh;
   
+  .safe-area {
+    padding-top: var(--status-bar-height, 44px); /* 默认安全区域 */
+  }
+  
   .nav-bar {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 88rpx;
     padding: 0 20rpx;
-    padding-top: var(--status-bar-height);
     background-color: #bc8f56;
     
     .title {
