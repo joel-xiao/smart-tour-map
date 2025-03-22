@@ -1,5 +1,8 @@
 <template>
   <view class="attraction-detail">
+    <!-- 状态栏背景 -->
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    
     <!-- 返回按钮和标题栏 -->
     <view class="nav-bar">
       <view class="left-btn" @click="goBack">
@@ -160,13 +163,15 @@ export default {
         }
       ],
       selectedCount: 0,
-      totalPrice: 0
+      totalPrice: 0,
+      statusBarHeight: 20
     }
   },
   onLoad(options) {
     // 获取景点ID，根据ID加载详情
     const id = options.id || 1
     this.loadAttractionDetail(id)
+    this.computeStatusBarHeight()
   },
   methods: {
     loadAttractionDetail(id) {
@@ -174,7 +179,13 @@ export default {
       console.log('加载景点详情，ID：', id)
     },
     goBack() {
-      uni.navigateBack()
+      uni.navigateBack({
+        fail: () => {
+          uni.switchTab({
+            url: '/pages/index/index'
+          });
+        }
+      });
     },
     openMap() {
       uni.showToast({
@@ -229,49 +240,76 @@ export default {
       uni.navigateTo({
         url: `/pages/attraction/guide?id=${this.attractionId}`
       })
+    },
+    // 计算状态栏高度
+    computeStatusBarHeight() {
+      try {
+        const systemInfo = uni.getSystemInfoSync();
+        console.log('系统信息:', systemInfo);
+        this.statusBarHeight = systemInfo.statusBarHeight || 20;
+        console.log('状态栏高度:', this.statusBarHeight);
+      } catch (e) {
+        console.error('获取系统信息失败:', e);
+      }
     }
   }
 }
 </script>
 
 <style lang="scss">
-/* 导航栏样式 */
-.nav-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 88rpx;
-  padding: 0 20rpx;
-  padding-top: var(--status-bar-height);
-  background-color: rgba(255,255,255,0.9);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
+.attraction-detail {
+  background-color: #f5f5f5;
   
-  .left-btn {
-    padding: 16rpx;
-    
-    .iconfont {
-      font-size: 36rpx;
-      color: #333;
-    }
+  /* 状态栏背景 */
+  .status-bar {
+    background-color: #bc8f56;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
   }
   
-  .title {
-    font-size: 32rpx;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .right-btns {
+  .nav-bar {
+    position: relative;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80rpx;
+    padding: 0;
+    background-color: #bc8f56;
     
-    .iconfont {
-      font-size: 36rpx;
-      color: #333;
-      margin-left: 30rpx;
+    .left-btn {
+      padding: 16rpx;
+      z-index: 2;
+      
+      .iconfont {
+        font-size: 36rpx;
+        color: #fff;
+      }
+    }
+    
+    .title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+      top: -5rpx;
+    }
+    
+    .right-btns {
+      padding: 16rpx;
+      display: flex;
+      z-index: 2;
+      
+      .iconfont {
+        font-size: 36rpx;
+        color: #fff;
+        margin-left: 20rpx;
+      }
     }
   }
 }

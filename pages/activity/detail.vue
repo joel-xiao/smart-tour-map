@@ -1,5 +1,8 @@
 <template>
   <view class="activity-page">
+    <!-- 状态栏背景 -->
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    
     <view class="nav-bar">
       <view class="left-btn" @click="goBack">
         <text class="iconfont icon-back"></text>
@@ -78,6 +81,14 @@
 
 <script>
 export default {
+  data() {
+    return {
+      statusBarHeight: 20
+    }
+  },
+  onLoad() {
+    this.computeStatusBarHeight();
+  },
   methods: {
     goBack() {
       uni.navigateBack();
@@ -87,6 +98,17 @@ export default {
         title: '报名成功',
         icon: 'success'
       });
+    },
+    // 计算状态栏高度
+    computeStatusBarHeight() {
+      try {
+        const systemInfo = uni.getSystemInfoSync();
+        console.log('系统信息:', systemInfo);
+        this.statusBarHeight = systemInfo.statusBarHeight || 20;
+        console.log('状态栏高度:', this.statusBarHeight);
+      } catch (e) {
+        console.error('获取系统信息失败:', e);
+      }
     }
   }
 }
@@ -96,16 +118,27 @@ export default {
 .activity-page {
   min-height: 100vh;
   
+  /* 状态栏背景 */
+  .status-bar {
+    background-color: #bc8f56;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
+  
   .nav-bar {
     display: flex;
     align-items: center;
-    height: 88rpx;
-    padding: 0 20rpx;
-    padding-top: var(--status-bar-height);
+    height: 80rpx;
+    padding: 0;
     background-color: #bc8f56;
+    position: relative;
     
     .left-btn {
       padding: 16rpx;
+      z-index: 2;
       
       .iconfont {
         font-size: 36rpx;
@@ -114,11 +147,14 @@ export default {
     }
     
     .title {
-      flex: 1;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
       text-align: center;
       font-size: 32rpx;
       font-weight: bold;
       color: #fff;
+      top: -5rpx;
     }
   }
   
