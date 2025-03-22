@@ -61,11 +61,16 @@ export default {
     padding: 0 20rpx;
     background-color: #bc8f56;
     width: 100%;
+    position: relative;
     
     .title {
       font-size: 32rpx;
       font-weight: bold;
       color: #fff;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
     }
   }
   
