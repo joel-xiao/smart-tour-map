@@ -1,7 +1,10 @@
 <template>
   <view class="guide-container">
+    <!-- 状态栏背景 -->
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    
     <!-- 导览头部 -->
-    <view class="guide-header" :style="{height: '280rpx', paddingTop: (statusBarHeight + 10) + 'px'}" v-if="currentSpot">
+    <view class="guide-header" :style="{height: '280rpx'}" v-if="currentSpot">
       <image 
         class="spot-banner" 
         :src="currentSpot && currentSpot.banner ? currentSpot.banner : '/static/images/backgrounds/bg.jpg'" 
@@ -12,7 +15,7 @@
       
       <view class="header-mask"></view>
       
-      <view class="header-controls" :style="{top: (statusBarHeight + 10) + 'px'}">
+      <view class="header-controls">
         <view class="back-btn" @click="goBack">
           <text class="iconfont icon-back"></text>
         </view>
@@ -789,15 +792,12 @@ export default {
     // 获取状态栏高度
     getStatusBarHeight() {
       try {
-        // 获取系统信息
         const systemInfo = uni.getSystemInfoSync();
-        // 设置状态栏高度
-        this.statusBarHeight = systemInfo.statusBarHeight || 80;
+        console.log('系统信息:', systemInfo);
+        this.statusBarHeight = systemInfo.statusBarHeight || 20;
         console.log('状态栏高度:', this.statusBarHeight);
-      } catch (error) {
-        console.error('获取状态栏高度失败:', error);
-        // 使用默认值
-        this.statusBarHeight = 80;
+      } catch (e) {
+        console.error('获取系统信息失败:', e);
       }
     },
     
@@ -856,121 +856,150 @@ export default {
 </script>
 
 <style lang="scss">
-.guide-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: var(--bg-color);
+/* 页面变量 */
+:root {
+  --primary-color: #bc8f56;
+  --secondary-color: #f0f0f0;
+  --text-color: #333;
+  --text-light: #999;
+  --border-radius: 12rpx;
 }
 
-.guide-header {
+.guide-container {
   position: relative;
-  height: 380rpx;
-  overflow: hidden;
+  min-height: 100vh;
+  background-color: #f5f5f5;
   
-  .spot-banner {
+  /* 状态栏背景 */
+  .status-bar {
+    background-color: #bc8f56;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .header-mask {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
   }
   
-  .header-controls {
-    position: absolute;
-    top: 20rpx;
-    left: 20rpx;
-    display: flex;
-    align-items: center;
-    z-index: 10;
+  .guide-header {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
     
-    .back-btn {
-      width: 70rpx;
-      height: 70rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(0, 0, 0, 0.3);
-      border-radius: 50%;
-      
-      .iconfont {
-        font-size: 40rpx;
-        color: #ffffff;
-      }
+    .spot-banner {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
     }
     
-    .action-btn {
-      width: 70rpx;
-      height: 70rpx;
-      border-radius: 50%;
-      background-color: var(--primary-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: 20rpx;
-      
-      .iconfont {
-        color: #fff;
-        font-size: 32rpx;
-      }
-    }
-  }
-  
-  .header-info {
-    position: absolute;
-    left: 30rpx;
-    bottom: 30rpx;
-    display: flex;
-    flex-direction: column;
-    
-    .spot-info {
-      .spot-name {
-        font-size: 40rpx;
-        font-weight: bold;
-        color: #fff;
-        text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
-        margin-bottom: 10rpx;
-      }
-      
-      .spot-tag {
-        font-size: 24rpx;
-        color: #fff;
-        background-color: rgba(188, 143, 86, 0.8);
-        padding: 4rpx 16rpx;
-        border-radius: 20rpx;
-        width: fit-content;
-      }
+    .header-mask {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.2));
+      z-index: 2;
     }
     
-    .spot-location {
+    .header-controls {
+      position: absolute;
       display: flex;
-      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 20rpx;
+      box-sizing: border-box;
+      z-index: 3;
+      margin-top: 10rpx;
       
-      .location-text {
-        font-size: 24rpx;
-        color: #fff;
-        margin-right: 20rpx;
-      }
-      
-      .location-btn {
+      .back-btn {
+        width: 64rpx;
+        height: 64rpx;
+        border-radius: 50%;
+        background-color: rgba(0,0,0,0.3);
         display: flex;
         align-items: center;
+        justify-content: center;
         
-        .location-icon {
-          font-size: 32rpx;
+        .iconfont {
           color: #fff;
+          font-size: 40rpx;
+        }
+      }
+      
+      .action-btn {
+        width: 64rpx;
+        height: 64rpx;
+        border-radius: 50%;
+        background-color: rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        .iconfont {
+          color: #fff;
+          font-size: 36rpx;
+        }
+      }
+    }
+    
+    .header-info {
+      position: absolute;
+      bottom: 20rpx;
+      left: 20rpx;
+      right: 20rpx;
+      z-index: 3;
+      
+      .spot-info {
+        margin-bottom: 10rpx;
+        
+        .spot-name {
+          font-size: 40rpx;
+          color: #fff;
+          font-weight: bold;
+          text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
+          margin-right: 16rpx;
         }
         
-        .location-label {
+        .spot-tag {
           font-size: 24rpx;
           color: #fff;
+          background-color: rgba(188,143,86,0.8);
+          padding: 4rpx 10rpx;
+          border-radius: 20rpx;
+        }
+      }
+      
+      .spot-location {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        
+        .location-text {
+          font-size: 26rpx;
+          color: #fff;
+          text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
+        }
+        
+        .location-btn {
+          display: flex;
+          align-items: center;
+          background-color: rgba(255,255,255,0.2);
+          padding: 6rpx 16rpx;
+          border-radius: 30rpx;
+          
+          .location-icon {
+            font-size: 24rpx;
+            color: #fff;
+            margin-right: 6rpx;
+          }
+          
+          .location-label {
+            font-size: 24rpx;
+            color: #fff;
+          }
         }
       }
     }
