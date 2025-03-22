@@ -1,5 +1,8 @@
 <template>
   <view class="order-page">
+    <!-- 状态栏背景 -->
+    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    
     <!-- 顶部导航栏 -->
     <view class="nav-bar">
       <view class="left-btn" @click="goBack">
@@ -136,6 +139,7 @@
 export default {
   data() {
     return {
+      statusBarHeight: 20,
       dateList: ['2025-03-22', '2025-03-23', '2025-03-24', '2025-03-25'],
       currentDateIndex: 0,
       orderInfo: {
@@ -160,6 +164,9 @@ export default {
     }
   },
   onLoad(options) {
+    // 计算状态栏高度
+    this.computeStatusBarHeight();
+    
     // 从上一页接收参数
     if (options.ticketId) {
       console.log('票型ID:', options.ticketId)
@@ -267,6 +274,17 @@ export default {
           }, 2000)
         }
       })
+    },
+    // 计算状态栏高度
+    computeStatusBarHeight() {
+      try {
+        const systemInfo = uni.getSystemInfoSync();
+        console.log('系统信息:', systemInfo);
+        this.statusBarHeight = systemInfo.statusBarHeight || 20;
+        console.log('状态栏高度:', this.statusBarHeight);
+      } catch (e) {
+        console.error('获取系统信息失败:', e);
+      }
     }
   }
 }
@@ -274,122 +292,148 @@ export default {
 
 <style lang="scss">
 .order-page {
-  min-height: 100vh;
   background-color: #f5f5f5;
-  padding-bottom: 120rpx;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  
+  /* 状态栏背景 */
+  .status-bar {
+    background-color: #bc8f56;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
   
   .nav-bar {
+    position: relative;
     display: flex;
     align-items: center;
-    height: 88rpx;
-    padding: 0 20rpx;
-    padding-top: var(--status-bar-height);
-    background-color: #fff;
+    justify-content: space-between;
+    height: 80rpx;
+    padding: 0;
+    background-color: #bc8f56;
     
     .left-btn {
       padding: 16rpx;
+      z-index: 2;
       
       .iconfont {
         font-size: 36rpx;
-        color: #333;
+        color: #fff;
       }
     }
     
     .title {
-      flex: 1;
-      text-align: center;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 32rpx;
       font-weight: bold;
-      color: #333;
+      color: #fff;
+      text-align: center;
+      top: -5rpx;
     }
     
     .more-btn {
       padding: 16rpx;
+      z-index: 2;
       
       .iconfont {
         font-size: 36rpx;
-        color: #333;
+        color: #fff;
       }
     }
   }
   
   .date-tabs {
     display: flex;
-    background-color: #000;
-    height: 80rpx;
+    background-color: #fff;
+    padding: 20rpx 0;
+    margin-bottom: 20rpx;
+    box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
     
     .date-tab {
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
+      text-align: center;
       font-size: 28rpx;
+      color: #666;
+      padding: 10rpx 0;
       
       &.active {
+        color: #bc8f56;
+        font-weight: bold;
         position: relative;
         
         &::after {
           content: '';
           position: absolute;
-          bottom: 0;
+          bottom: -10rpx;
           left: 50%;
           transform: translateX(-50%);
-          width: 30rpx;
-          height: 6rpx;
-          background-color: #f55;
-          border-radius: 3rpx;
+          width: 40rpx;
+          height: 4rpx;
+          background-color: #bc8f56;
+          border-radius: 2rpx;
         }
       }
     }
   }
   
   .order-card {
-    margin: 20rpx;
     background-color: #fff;
     border-radius: 16rpx;
+    margin: 0 20rpx 20rpx;
     overflow: hidden;
+    box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
     
     .order-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 30rpx;
+      align-items: flex-start;
+      padding: 30rpx 20rpx;
+      border-bottom: 1rpx solid #f5f5f5;
       
       .order-title {
-        font-size: 34rpx;
+        font-size: 32rpx;
         font-weight: bold;
         color: #333;
+        flex: 1;
+        padding-right: 20rpx;
       }
       
       .close-btn {
         font-size: 40rpx;
         color: #999;
-        padding: 0 10rpx;
+        line-height: 1;
       }
     }
     
     .info-section {
-      padding: 20rpx 30rpx;
+      padding: 20rpx;
+      border-bottom: 1rpx solid #f5f5f5;
       
       .info-title {
         font-size: 28rpx;
-        color: #333;
-        margin-bottom: 20rpx;
+        color: #666;
+        margin-bottom: 15rpx;
       }
       
       .date-selector {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         
         .calendar-icon {
           font-size: 36rpx;
-          color: #333;
+          color: #bc8f56;
           margin-right: 10rpx;
         }
         
         .date-text {
-          font-size: 32rpx;
+          font-size: 30rpx;
           color: #333;
           flex: 1;
         }
@@ -397,12 +441,12 @@ export default {
         .change-btn {
           display: flex;
           align-items: center;
-          color: #4080ff;
-          font-size: 28rpx;
+          color: #bc8f56;
+          font-size: 26rpx;
           
           .iconfont {
             font-size: 24rpx;
-            margin-left: 4rpx;
+            margin-left: 5rpx;
           }
         }
       }
@@ -414,29 +458,28 @@ export default {
         .decrease-btn, .increase-btn {
           width: 60rpx;
           height: 60rpx;
+          border: 1rpx solid #ddd;
           border-radius: 30rpx;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 36rpx;
-          border: 2rpx solid #eee;
-          color: #333;
+          color: #bc8f56;
         }
         
         .quantity {
-          margin: 0 30rpx;
-          font-size: 36rpx;
-          color: #333;
-          min-width: 60rpx;
+          min-width: 80rpx;
           text-align: center;
+          font-size: 32rpx;
+          color: #333;
+          margin: 0 20rpx;
         }
       }
     }
     
     .ticket-item {
-      margin: 0 30rpx;
-      padding: 30rpx 0;
-      border-top: 1rpx solid #f2f2f2;
+      padding: 20rpx;
+      border-bottom: 1rpx solid #f5f5f5;
       
       .ticket-name {
         font-size: 30rpx;
@@ -445,41 +488,33 @@ export default {
       }
       
       .ticket-count {
-        position: absolute;
-        right: 30rpx;
         font-size: 28rpx;
-        color: #333;
+        color: #bc8f56;
+        margin-bottom: 15rpx;
+        display: block;
       }
       
       .ticket-date {
         display: flex;
-        font-size: 24rpx;
+        justify-content: space-between;
+        font-size: 26rpx;
         color: #999;
-        margin-top: 10rpx;
         
         .date-value {
-          margin-left: 10rpx;
+          color: #666;
         }
       }
     }
     
     .booking-time {
-      padding: 30rpx;
-      
-      .info-title {
-        font-size: 28rpx;
-        color: #333;
-        margin-bottom: 20rpx;
-      }
+      padding: 20rpx;
       
       .time-unavailable {
-        height: 100rpx;
         background-color: #f5f5f5;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #999;
+        padding: 30rpx 0;
+        text-align: center;
         font-size: 28rpx;
+        color: #999;
         border-radius: 8rpx;
       }
     }
@@ -490,173 +525,164 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 100rpx;
-    background-color: #fff;
     display: flex;
     align-items: center;
-    padding: 0 30rpx;
+    background-color: #fff;
+    padding: 20rpx;
     box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
+    z-index: 100;
     
     .total-info {
       flex: 1;
-      font-size: 28rpx;
-      color: #333;
+      display: flex;
+      flex-direction: column;
+      
+      text {
+        font-size: 24rpx;
+        color: #666;
+      }
       
       .price {
-        margin-left: 10rpx;
-        color: #f55;
+        font-size: 36rpx;
+        color: #f56c6c;
         font-weight: bold;
         
         .symbol {
           font-size: 24rpx;
-        }
-        
-        .amount {
-          font-size: 36rpx;
+          margin-right: 5rpx;
         }
       }
     }
     
     .book-btn {
-      width: 300rpx;
-      height: 80rpx;
-      line-height: 80rpx;
-      text-align: center;
-      background-color: #f55;
+      background-color: #bc8f56;
       color: #fff;
-      font-size: 28rpx;
-      border-radius: 8rpx;
+      font-size: 30rpx;
+      padding: 20rpx 40rpx;
+      border-radius: 40rpx;
     }
   }
-}
-
-.calendar-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 999;
   
-  .calendar-mask {
-    position: absolute;
+  /* 日历弹窗 */
+  .calendar-popup {
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0,0,0,0.5);
-  }
-  
-  .calendar-content {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: #fff;
-    border-radius: 20rpx 20rpx 0 0;
-    overflow: hidden;
+    z-index: 1000;
     
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .calendar-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    .calendar-content {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #fff;
+      border-radius: 20rpx 20rpx 0 0;
       padding: 30rpx;
-      border-bottom: 1rpx solid #eee;
       
-      .header-title {
-        font-size: 32rpx;
-        font-weight: bold;
-        color: #333;
-      }
-      
-      .close-icon {
-        font-size: 40rpx;
-        color: #999;
-        padding: 0 10rpx;
-      }
-    }
-    
-    .week-header {
-      display: flex;
-      padding: 20rpx 0;
-      
-      .week-day {
-        flex: 1;
-        text-align: center;
-        font-size: 28rpx;
-        color: #666;
-        
-        &.weekend {
-          color: #f55;
-        }
-      }
-    }
-    
-    .month-title {
-      text-align: center;
-      font-size: 28rpx;
-      color: #333;
-      margin-bottom: 20rpx;
-    }
-    
-    .calendar-days {
-      display: flex;
-      flex-wrap: wrap;
-      padding: 0 20rpx 30rpx;
-      
-      .day-item {
-        width: 14.28%;
-        height: 80rpx;
+      .calendar-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        font-size: 28rpx;
-        color: #333;
+        margin-bottom: 20rpx;
         
-        &.empty {
-          pointer-events: none;
+        .header-title {
+          font-size: 32rpx;
+          font-weight: bold;
+          color: #333;
         }
         
-        &.today {
-          text {
-            color: #4080ff;
-            font-weight: bold;
+        .close-icon {
+          font-size: 40rpx;
+          color: #999;
+        }
+      }
+      
+      .week-header {
+        display: flex;
+        margin-bottom: 20rpx;
+        
+        .week-day {
+          flex: 1;
+          text-align: center;
+          font-size: 28rpx;
+          color: #999;
+          
+          &.weekend {
+            color: #f56c6c;
           }
         }
+      }
+      
+      .month-title {
+        text-align: center;
+        font-size: 30rpx;
+        color: #333;
+        margin-bottom: 20rpx;
+      }
+      
+      .calendar-days {
+        display: flex;
+        flex-wrap: wrap;
         
-        &.selected {
+        .day-item {
+          width: 14.28%;
+          height: 80rpx;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          
           text {
+            width: 60rpx;
+            height: 60rpx;
+            border-radius: 30rpx;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 60rpx;
-            height: 60rpx;
-            background-color: #f55;
+            font-size: 28rpx;
+            color: #333;
+          }
+          
+          &.empty {
+            pointer-events: none;
+          }
+          
+          &.today text {
+            background-color: #f5f5f5;
+          }
+          
+          &.selected text {
+            background-color: #bc8f56;
             color: #fff;
-            border-radius: 50%;
+          }
+          
+          &.weekend:not(.selected) text {
+            color: #f56c6c;
           }
         }
-        
-        &.weekend {
-          color: #f55;
-        }
       }
-    }
-    
-    .calendar-footer {
-      padding: 20rpx 30rpx 50rpx;
-      display: flex;
-      justify-content: center;
       
-      .confirm-btn {
-        width: 90%;
-        height: 80rpx;
-        line-height: 80rpx;
-        text-align: center;
-        background-color: #f55;
-        color: #fff;
-        font-size: 30rpx;
-        border-radius: 40rpx;
+      .calendar-footer {
+        margin-top: 30rpx;
+        
+        .confirm-btn {
+          background-color: #bc8f56;
+          color: #fff;
+          font-size: 30rpx;
+          padding: 20rpx 0;
+          border-radius: 40rpx;
+          text-align: center;
+        }
       }
     }
   }
