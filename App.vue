@@ -59,8 +59,9 @@
 </script>
 
 <style>
-	/* 引入第三方图标字体，实际使用时需要替换为正确的CDN地址 */
+	/* #ifdef H5 */
 	@import url("https://at.alicdn.com/t/font_2878562_8l21pdf3xv.css");
+	/* #endif */
 	
 	/* 隐藏滚动条 */
 	::-webkit-scrollbar {

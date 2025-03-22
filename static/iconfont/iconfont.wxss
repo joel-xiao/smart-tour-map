@@ -1,0 +1,43 @@
+@font-face {
+  font-family: "iconfont";
+  src: url('data:font/truetype;charset=utf-8;base64,<此处省略base64编码>') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-ticket:before { content: "\e648"; }
+.icon-show:before { content: "\e652"; }
+.icon-hotel:before { content: "\e62f"; }
+.icon-leisure:before { content: "\e626"; }
+.icon-food:before { content: "\e60a"; }
+.icon-parent:before { content: "\e61a"; }
+.icon-souvenir:before { content: "\e620"; }
+.icon-tour:before { content: "\e63c"; }
+.icon-home:before { content: "\e608"; }
+.icon-map:before { content: "\e60c"; }
+.icon-smart:before { content: "\e646"; }
+.icon-user:before { content: "\e607"; }
+.icon-back:before { content: "\e679"; }
+.icon-share:before { content: "\e66f"; }
+.icon-collect:before { content: "\e665"; }
+.icon-right:before { content: "\e6a3"; }
+.icon-more:before { content: "\e684"; }
+.icon-calendar:before { content: "\e6a5"; }
+.icon-search:before { content: "\e602"; }
+.icon-navigation:before { content: "\e60c"; }
+.icon-add:before { content: "\e767"; }
+.icon-minus:before { content: "\e765"; }
+.icon-location:before { content: "\e650"; }
+.icon-3d:before { content: "\e603"; }
+.icon-2d:before { content: "\e601"; }
+.icon-info:before { content: "\e6e5"; }
+.icon-close:before { content: "\e668"; }
+.icon-target:before { content: "\e651"; }
+.icon-park:before { content: "\e652"; }
+.icon-board:before { content: "\e7b0"; }
+.icon-panorama:before { content: "\e606"; } 

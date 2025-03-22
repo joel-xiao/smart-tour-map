@@ -4,6 +4,11 @@ import mapConfig from './static/config/mapConfig.js'
 // #ifndef VUE3
 import Vue from 'vue'
 import './uni.promisify.adaptor'
+
+// #ifdef MP-WEIXIN
+import './static/iconfont/iconfont.wxss'
+// #endif
+
 Vue.config.productionTip = false
 App.mpType = 'app'
 const app = new Vue({
