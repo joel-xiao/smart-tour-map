@@ -8,9 +8,9 @@
       <view class="left-btn" @click="goBack">
         <text class="iconfont icon-back"></text>
       </view>
-      <view class="title">景区详情</view>
-      <view class="more-btn">
-        <text class="iconfont icon-more"></text>
+      <view class="title">景点详情</view>
+      <view class="right-btn" @click="navigateToMap">
+        <text class="iconfont icon-map"></text>
       </view>
     </view>
     
@@ -55,9 +55,13 @@
     
     <!-- 订单卡片 -->
     <view class="order-card">
-      <view class="order-header">
-        <text class="order-title">{{orderInfo.title}}</text>
-        <text class="close-btn" @click="cancelOrder">×</text>
+      <!-- 景点图片展示 -->
+      <view class="scenic-image">
+        <image :src="scenicImage" mode="aspectFill"></image>
+        <view class="image-overlay"></view>
+        <view class="image-title">
+          <text>{{orderInfo.title}}</text>
+        </view>
       </view>
       
       <!-- 旅行日期 -->
@@ -133,7 +137,7 @@
           <text class="amount">{{totalPrice.toFixed(2)}}</text>
         </text>
       </view>
-      <view class="book-btn" @click="confirmOrder">立即预订 Book Now</view>
+      <view class="add-btn" @click="confirmOrder">+</view>
     </view>
   </view>
 </template>
@@ -160,7 +164,8 @@ export default {
       selectedDay: 22,
       daysArray: [],
       bottomBarHeight: 140, // 底部栏高度（包含安全区域）
-      safeAreaBottom: 0 // 底部安全区域高度
+      safeAreaBottom: 0, // 底部安全区域高度
+      scenicImage: '/static/images/scenic/badaling.jpg'
     }
   },
   computed: {
@@ -177,6 +182,9 @@ export default {
       console.log('票型ID:', options.ticketId)
       // 根据ID获取票型信息
     }
+    
+    // 确保静态资源目录存在
+    this.checkStaticResources();
   },
   created() {
     this.generateCalendar()
@@ -184,6 +192,12 @@ export default {
   methods: {
     goBack() {
       uni.navigateBack()
+    },
+    navigateToMap() {
+      // 导航到地图页面
+      uni.switchTab({
+        url: '/pages/map/index'
+      })
     },
     selectDate(index) {
       this.currentDateIndex = index
@@ -267,18 +281,38 @@ export default {
       this.orderInfo.quantity++
     },
     confirmOrder() {
-      uni.showToast({
-        title: '预订成功',
-        icon: 'success',
-        duration: 2000,
-        success: () => {
-          setTimeout(() => {
-            uni.navigateBack({
-              delta: 2 // 返回上上页
-            })
-          }, 2000)
+      // 显示导航提示
+      uni.showModal({
+        title: '导航提示',
+        content: '是否开始导航到景点？',
+        confirmText: '开始导航',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            // 模拟导航数据（实际项目中应该从服务器获取）
+            const navData = {
+              id: 'scenic_001',
+              name: '八达岭长城',
+              latitude: 40.359836,
+              longitude: 116.019772,
+              address: '北京市延庆区G6京藏高速58号',
+              type: 'scenic'
+            };
+            
+            // 跳转到地图页面并传递导航数据
+            uni.setStorageSync('navTarget', navData);
+            
+            // 使用switchTab跳转到tabBar页面
+            uni.switchTab({
+              url: '/pages/map/index',
+              success: () => {
+                // 发送事件通知地图页面开始导航
+                uni.$emit('startNavigation', navData);
+              }
+            });
+          }
         }
-      })
+      });
     },
     // 计算状态栏高度和安全区域
     computeStatusBarHeight() {
@@ -306,6 +340,24 @@ export default {
         this.bottomBarHeight = 100 + this.safeAreaBottom;
       } catch (e) {
         console.error('获取系统信息失败:', e);
+      }
+    },
+    // 检查静态资源目录
+    checkStaticResources() {
+      const fs = uni.getFileSystemManager();
+      
+      try {
+        // 检查景点图片目录
+        const scenicDir = '/static/images/scenic';
+        
+        // 如果存在景点图片，直接使用；否则默认使用本地图片
+        this.scenicImage = '/static/images/scenic/badaling.jpg'; 
+        
+        console.log('景点图片路径:', this.scenicImage);
+      } catch (e) {
+        console.error('静态资源检查失败:', e);
+        // 使用默认图片路径
+        this.scenicImage = '/static/images/default-scenic.jpg';
       }
     }
   }
@@ -336,12 +388,16 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 80rpx;
-    padding: 0;
+    height: 90rpx;
+    padding: 0 20rpx;
     background-color: #bc8f56;
     
-    .left-btn {
-      padding: 16rpx;
+    .left-btn, .right-btn {
+      width: 80rpx;
+      height: 80rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 2;
       
       .iconfont {
@@ -354,21 +410,10 @@ export default {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 32rpx;
+      font-size: 34rpx;
       font-weight: bold;
       color: #fff;
       text-align: center;
-      top: -5rpx;
-    }
-    
-    .more-btn {
-      padding: 16rpx;
-      z-index: 2;
-      
-      .iconfont {
-        font-size: 36rpx;
-        color: #fff;
-      }
     }
   }
   
@@ -413,26 +458,49 @@ export default {
     overflow: hidden;
     box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
     
+    /* 景点图片展示 */
+    .scenic-image {
+      position: relative;
+      width: 100%;
+      height: 360rpx;
+      
+      image {
+        width: 100%;
+        height: 100%;
+      }
+      
+      .image-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 120rpx;
+        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+      }
+      
+      .image-title {
+        position: absolute;
+        bottom: 20rpx;
+        left: 20rpx;
+        right: 20rpx;
+        
+        text {
+          color: #fff;
+          font-size: 32rpx;
+          font-weight: bold;
+          display: block;
+          line-height: 1.4;
+          text-shadow: 0 1rpx 3rpx rgba(0,0,0,0.5);
+        }
+      }
+    }
+    
     .order-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       padding: 30rpx 20rpx;
       border-bottom: 1rpx solid #f5f5f5;
-      
-      .order-title {
-        font-size: 32rpx;
-        font-weight: bold;
-        color: #333;
-        flex: 1;
-        padding-right: 20rpx;
-      }
-      
-      .close-btn {
-        font-size: 40rpx;
-        color: #999;
-        line-height: 1;
-      }
     }
     
     .info-section {
@@ -585,12 +653,17 @@ export default {
       }
     }
     
-    .book-btn {
+    .add-btn {
+      width: 80rpx;
+      height: 80rpx;
+      border-radius: 50%;
       background-color: #bc8f56;
       color: #fff;
-      font-size: 30rpx;
-      padding: 20rpx 40rpx;
-      border-radius: 40rpx;
+      font-size: 48rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2rpx 10rpx rgba(188,143,86,0.4);
     }
   }
   
