@@ -1,7 +1,7 @@
 <template>
   <view class="guide-container">
     <!-- 导览头部 -->
-    <view class="guide-header" :style="{height: statusBarHeight + 'px', paddingTop: '10px'}" v-if="currentSpot">
+    <view class="guide-header" :style="{height: '280rpx', paddingTop: '10px'}" v-if="currentSpot">
       <image 
         class="spot-banner" 
         :src="currentSpot && currentSpot.banner ? currentSpot.banner : '/static/images/backgrounds/bg.jpg'" 
