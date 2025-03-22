@@ -18,7 +18,14 @@
       "ignore": [],
       "disablePlugins": [],
       "outputPath": ""
-    }
+    },
+    "urlCheck": false,
+    "checkSiteMap": false,
+    "checkInvalidKey": false,
+    "lazyCodeLoading": "requiredComponents",
+    "ignoreDevUnusedFiles": false,
+    "ignoreUploadUnusedFiles": false,
+    "compileHotReLoad": true
   },
   "condition": {},
   "editorSetting": {
