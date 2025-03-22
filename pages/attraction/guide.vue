@@ -9,16 +9,24 @@
     </view>
     
     <!-- 景点大图 -->
-    <view class="spot-banner">
+    <view class="spot-banner" v-if="currentSpot && currentSpot.banner">
       <image :src="currentSpot.banner" mode="aspectFill" class="banner-image"></image>
       <view class="banner-info">
         <text class="banner-title">{{currentSpot.name}}</text>
         <text class="banner-tag">{{currentSpot.tag}}</text>
       </view>
     </view>
+    <!-- 备用显示 -->
+    <view class="spot-banner" v-else>
+      <image src="/static/images/backgrounds/bg.jpg" mode="aspectFill" class="banner-image"></image>
+      <view class="banner-info">
+        <text class="banner-title">{{currentSpot ? currentSpot.name : '景点'}}</text>
+        <text class="banner-tag">{{currentSpot ? currentSpot.tag : '景点'}}</text>
+      </view>
+    </view>
     
     <!-- 导览功能区 -->
-    <view class="guide-features">
+    <view class="guide-features" v-if="currentSpot">
       <view class="feature-item" @click="showMapView">
         <view class="feature-icon">
           <text class="iconfont icon-location"></text>
@@ -46,7 +54,7 @@
     </view>
     
     <!-- 语音导览控制栏 -->
-    <view class="audio-control">
+    <view class="audio-control" v-if="currentSpot">
       <view class="audio-btn" @click="togglePlay">
         <text class="iconfont" :class="isPlaying ? 'icon-close' : 'icon-right'"></text>
       </view>
@@ -87,7 +95,7 @@
     </view>
     
     <!-- 导览内容区域 -->
-    <scroll-view class="guide-content" scroll-y enable-flex="true" :scroll-anchoring="true" enhanced="true" show-scrollbar="false">
+    <scroll-view class="guide-content" scroll-y enable-flex="true" :scroll-anchoring="true" enhanced="true" show-scrollbar="false" v-if="currentSpot">
       <!-- 内容区域容器 -->
       <view class="content-container">
         <!-- 景点介绍区 -->
@@ -96,31 +104,31 @@
             <text class="info-title">景点介绍</text>
           </view>
           <view class="info-body">
-            <text class="info-text">{{currentSpot.description}}</text>
+            <text class="info-text">{{currentSpot.description || '暂无描述'}}</text>
           </view>
         </view>
         
         <!-- 景点图片 -->
-        <scroll-view class="photos-scroll" scroll-x enhanced="true" show-scrollbar="false" :scroll-x="true">
+        <scroll-view class="photos-scroll" scroll-x enhanced="true" show-scrollbar="false" :scroll-x="true" v-if="currentSpot.photos && currentSpot.photos.length > 0">
           <view class="photos-container">
             <view class="photo-item" v-for="(photo, index) in currentSpot.photos" :key="index" @click="previewImage(index)">
-              <image :src="photo" mode="aspectFill" class="spot-photo"></image>
+              <image :src="photo" mode="aspectFill" class="spot-photo" @error="photoLoadError(index)"></image>
             </view>
           </view>
         </scroll-view>
         
         <!-- 历史文化区 -->
-        <view class="info-card">
+        <view class="info-card" v-if="currentSpot">
           <view class="info-header">
             <text class="info-title">历史文化</text>
           </view>
           <view class="info-body">
-            <text class="info-text">{{currentSpot.history}}</text>
+            <text class="info-text">{{currentSpot.history || '暂无历史信息'}}</text>
           </view>
         </view>
         
         <!-- 参观提示区 -->
-        <view class="info-card">
+        <view class="info-card" v-if="currentSpot && currentSpot.tips && currentSpot.tips.length > 0">
           <view class="info-header">
             <text class="info-title">参观提示</text>
           </view>
@@ -133,28 +141,28 @@
         </view>
         
         <!-- 开放信息区 -->
-        <view class="info-card">
+        <view class="info-card" v-if="currentSpot">
           <view class="info-header">
             <text class="info-title">开放信息</text>
           </view>
           <view class="info-body">
             <view class="info-row">
               <text class="row-label">开放时间：</text>
-              <text class="row-value">{{currentSpot.openTime}}</text>
+              <text class="row-value">{{currentSpot.openTime || '暂无开放时间信息'}}</text>
             </view>
             <view class="info-row">
               <text class="row-label">门票信息：</text>
-              <text class="row-value">{{currentSpot.ticketInfo}}</text>
+              <text class="row-value">{{currentSpot.ticketInfo || '暂无票价信息'}}</text>
             </view>
             <view class="info-row">
               <text class="row-label">交通路线：</text>
-              <text class="row-value">{{currentSpot.transport}}</text>
+              <text class="row-value">{{currentSpot.transport || '暂无交通信息'}}</text>
             </view>
           </view>
         </view>
         
         <!-- 底部关联景点 -->
-        <view class="related-spots">
+        <view class="related-spots" v-if="relatedSpots && relatedSpots.length > 0">
           <view class="related-header">
             <text class="related-title">相关景点</text>
             <text class="view-more">查看更多</text>
@@ -166,8 +174,8 @@
               :key="index"
               @click="switchSpot(item.id)"
             >
-              <image :src="item.image" mode="aspectFill" class="related-image"></image>
-              <text class="related-name">{{item.name}}</text>
+              <image :src="item.image || '/static/images/backgrounds/bg.jpg'" mode="aspectFill" class="related-image" @error="relatedImageError(index)"></image>
+              <text class="related-name">{{item.name || '未知景点'}}</text>
             </view>
           </scroll-view>
         </view>
@@ -207,7 +215,7 @@ export default {
         history: '暂无历史信息',
         ticketInfo: '暂无票价信息',
         transport: '暂无交通信息',
-        photos: ['/static/images/backgrounds/bg.jpg', '/static/images/backgrounds/bg.jpg', '/static/images/backgrounds/bg.jpg'],
+        photos: ['/static/images/backgrounds/bg.jpg'],
         tips: ['暂无参观提示'],
         audio: '',
         panoramaId: ''
@@ -223,18 +231,42 @@ export default {
   onLoad(options) {
     // 错误处理
     try {
+      console.log('页面加载参数:', options);
+      
       // 初始化音频上下文
       this.initAudioContext();
       
       // 提前初始化地图标记，防止空指针
       this.initMapMarkers();
       
+      // 确保currentSpot有默认值
+      if (!this.currentSpot) {
+        this.currentSpot = {
+          id: 1,
+          name: '景点',
+          tag: '景点',
+          longitude: 115.980,
+          latitude: 40.360,
+          location: '景区',
+          openTime: '暂无开放时间信息',
+          banner: '/static/images/backgrounds/bg.jpg',
+          description: '暂无描述',
+          history: '暂无历史信息',
+          ticketInfo: '暂无票价信息',
+          transport: '暂无交通信息',
+          photos: ['/static/images/backgrounds/bg.jpg'],
+          tips: ['暂无参观提示'],
+          audio: '',
+          panoramaId: ''
+        };
+      }
+      
       // 加载景点数据
-      if (options.id) {
+      if (options && options.id) {
         this.spotId = parseInt(options.id);
         this.loadSpotData(this.spotId);
       } else {
-        // 默认加载八达岭长城
+        // 默认加载景点
         this.loadSpotData(1);
       }
     } catch (error) {
@@ -250,6 +282,12 @@ export default {
     // 加载景点数据
     loadSpotData(id) {
       try {
+        if (!id) {
+          console.error('loadSpotData: id参数为空');
+          return;
+        }
+        
+        console.log('开始加载景点数据, id:', id);
         // 显示加载中
         uni.showLoading({
           title: '加载中...',
@@ -260,49 +298,53 @@ export default {
         let spot = null;
         
         // 在所有分类中查找该景点
-        for (const category of markersData) {
-          const found = category.data.find(item => item.id === id);
-          if (found) {
-            spot = found;
-            break;
+        if (Array.isArray(markersData)) {
+          for (const category of markersData) {
+            if (category && Array.isArray(category.data)) {
+              const found = category.data.find(item => item && item.id === id);
+              if (found) {
+                spot = found;
+                break;
+              }
+            }
           }
+        } else {
+          console.error('markersData 不是数组或为空');
         }
         
         if (!spot) {
           uni.hideLoading();
+          console.warn('未找到景点数据, id:', id);
           uni.showToast({
             title: '未找到景点数据',
             icon: 'none'
           });
           
-          // 尝试回退到默认景点
-          if (id !== 1) {
-            setTimeout(() => {
-              this.loadSpotData(1);
-            }, 1500);
-          }
+          // 保持当前景点不变
           return;
         }
         
         // 设置当前景点
         this.currentSpot = {
-          id: spot.id,
-          name: spot.name,
+          id: spot.id || 1,
+          name: spot.name || '未知景点',
           tag: spot.category || '景点',
-          longitude: spot.longitude,
-          latitude: spot.latitude,
-          location: spot.location || '八达岭景区',
+          longitude: spot.longitude || 115.980,
+          latitude: spot.latitude || 40.360,
+          location: spot.location || '景区',
           openTime: spot.open_time || '暂无开放时间信息',
-          banner: spot.images && spot.images.length > 0 ? spot.images[0] : '/static/images/backgrounds/bg.jpg',
+          banner: (spot.images && spot.images.length > 0) ? spot.images[0] : '/static/images/backgrounds/bg.jpg',
           description: spot.desc || '暂无描述',
           history: spot.history || '暂无历史信息',
           ticketInfo: spot.ticket_info || '暂无票价信息',
           transport: spot.transport || '暂无交通信息',
-          photos: spot.images || ['/static/images/backgrounds/bg.jpg', '/static/images/backgrounds/bg.jpg', '/static/images/backgrounds/bg.jpg'],
+          photos: (spot.images && spot.images.length > 0) ? spot.images : ['/static/images/backgrounds/bg.jpg'],
           tips: spot.tips || ['暂无参观提示'],
           audio: spot.audio || '',
           panoramaId: spot.panorama_id || ''
         };
+        
+        console.log('景点数据加载成功:', this.currentSpot.name);
         
         // 初始化地图标记
         this.initMapMarkers();
@@ -393,27 +435,49 @@ export default {
     
     // 加载相关景点
     loadRelatedSpots() {
-      this.relatedSpots = [];
-      
-      // 找到当前景点所在的分类
-      let category = null;
-      for (const cat of markersData) {
-        if (cat.data.some(item => item.id === this.currentSpot.id)) {
-          category = cat;
-          break;
+      try {
+        this.relatedSpots = [];
+        
+        if (!this.currentSpot || !this.currentSpot.id) {
+          console.warn('加载相关景点时currentSpot为空或id不存在');
+          return;
         }
+        
+        // 找到当前景点所在的分类
+        let category = null;
+        if (Array.isArray(markersData)) {
+          for (const cat of markersData) {
+            if (cat && Array.isArray(cat.data) && cat.data.some(item => item && item.id === this.currentSpot.id)) {
+              category = cat;
+              break;
+            }
+          }
+        }
+        
+        if (category && Array.isArray(category.data)) {
+          // 从同类别中找出4个其他景点
+          this.relatedSpots = category.data
+            .filter(item => item && item.id !== this.currentSpot.id)
+            .slice(0, 4)
+            .map(item => ({
+              id: item.id,
+              name: item.name || '未知景点',
+              image: (item.images && item.images.length > 0) ? item.images[0] : '/static/images/backgrounds/bg.jpg'
+            }));
+          console.log('已加载相关景点:', this.relatedSpots.length);
+        } else {
+          console.warn('未找到当前景点所在分类或分类中没有其他景点');
+        }
+      } catch (error) {
+        console.error('加载相关景点错误:', error);
       }
-      
-      if (category) {
-        // 从同类别中找出4个其他景点
-        this.relatedSpots = category.data
-          .filter(item => item.id !== this.currentSpot.id)
-          .slice(0, 4)
-          .map(item => ({
-            id: item.id,
-            name: item.name,
-            image: item.images && item.images.length > 0 ? item.images[0] : '/static/images/backgrounds/bg.jpg'
-          }));
+    },
+    
+    // 处理相关景点图片加载错误
+    relatedImageError(index) {
+      console.warn('相关景点图片加载失败, 索引:', index);
+      if (this.relatedSpots && this.relatedSpots[index]) {
+        this.$set(this.relatedSpots[index], 'image', '/static/images/backgrounds/bg.jpg');
       }
     },
     
@@ -641,6 +705,15 @@ export default {
         this.loadSpotData(this.spotId);
       } else {
         this.loadSpotData(1);
+      }
+    },
+    
+    // 处理图片加载错误
+    photoLoadError(index) {
+      console.warn('图片加载失败, 索引:', index);
+      // 替换为默认图片
+      if (this.currentSpot && this.currentSpot.photos) {
+        this.$set(this.currentSpot.photos, index, '/static/images/backgrounds/bg.jpg');
       }
     }
   },
