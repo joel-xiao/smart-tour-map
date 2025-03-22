@@ -193,8 +193,25 @@ export default {
       is3DView: false,
       isCollected: false,
       
-      // 当前景点信息
-      currentSpot: null,
+      // 当前景点信息 - 添加默认值防止空指针
+      currentSpot: {
+        id: 1,
+        name: '景点',
+        tag: '景点',
+        longitude: 115.980,
+        latitude: 40.360,
+        location: '景区',
+        openTime: '暂无开放时间信息',
+        banner: '/static/images/backgrounds/bg.jpg',
+        description: '暂无描述',
+        history: '暂无历史信息',
+        ticketInfo: '暂无票价信息',
+        transport: '暂无交通信息',
+        photos: ['/static/images/backgrounds/bg.jpg', '/static/images/backgrounds/bg.jpg', '/static/images/backgrounds/bg.jpg'],
+        tips: ['暂无参观提示'],
+        audio: '',
+        panoramaId: ''
+      },
       
       // 地图标记
       mapMarkers: [],
@@ -206,6 +223,13 @@ export default {
   onLoad(options) {
     // 错误处理
     try {
+      // 初始化音频上下文
+      this.initAudioContext();
+      
+      // 提前初始化地图标记，防止空指针
+      this.initMapMarkers();
+      
+      // 加载景点数据
       if (options.id) {
         this.spotId = parseInt(options.id);
         this.loadSpotData(this.spotId);
@@ -213,29 +237,6 @@ export default {
         // 默认加载八达岭长城
         this.loadSpotData(1);
       }
-      
-      // 初始化音频上下文
-      this.initAudioContext();
-      
-      // 提前初始化地图标记，防止空指针
-      this.mapMarkers = [{
-        id: 1,
-        longitude: 115.980,
-        latitude: 40.360,
-        title: "八达岭长城",
-        iconPath: '/static/images/backgrounds/bg.jpg',
-        width: 32,
-        height: 40,
-        callout: {
-          content: "八达岭长城",
-          display: 'ALWAYS',
-          bgColor: "#ffffff",
-          color: "#333333",
-          borderRadius: 3,
-          fontSize: 12,
-          padding: 8
-        }
-      }];
     } catch (error) {
       console.error('页面加载错误:', error);
       this.handleError('页面加载失败，请重试');
@@ -320,22 +321,74 @@ export default {
     
     // 初始化地图标记
     initMapMarkers() {
-      this.mapMarkers = [
-        {
-          id: this.currentSpot.id,
-          longitude: this.currentSpot.longitude,
-          latitude: this.currentSpot.latitude,
-          title: this.currentSpot.name,
-          iconPath: '/static/images/backgrounds/bg.jpg',
-          width: mapConfig.markerStyle.width,
-          height: mapConfig.markerStyle.height,
-          callout: {
-            content: this.currentSpot.name,
-            ...mapConfig.markerStyle.calloutStyle,
-            display: 'ALWAYS'
-          }
+      try {
+        if (!this.currentSpot) {
+          console.warn('初始化地图标记时currentSpot为空');
+          this.mapMarkers = [{
+            id: 1,
+            longitude: 115.980,
+            latitude: 40.360,
+            title: "景点",
+            iconPath: '/static/images/backgrounds/bg.jpg',
+            width: 32,
+            height: 40,
+            callout: {
+              content: "景点",
+              display: 'ALWAYS',
+              bgColor: "#ffffff",
+              color: "#333333",
+              borderRadius: 3,
+              fontSize: 12,
+              padding: 8
+            }
+          }];
+          return;
         }
-      ];
+        
+        this.mapMarkers = [
+          {
+            id: this.currentSpot.id,
+            longitude: this.currentSpot.longitude,
+            latitude: this.currentSpot.latitude,
+            title: this.currentSpot.name,
+            iconPath: '/static/images/backgrounds/bg.jpg',
+            width: mapConfig.markerStyle ? mapConfig.markerStyle.width : 32,
+            height: mapConfig.markerStyle ? mapConfig.markerStyle.height : 40,
+            callout: {
+              content: this.currentSpot.name,
+              display: 'ALWAYS',
+              bgColor: "#ffffff",
+              color: "#333333",
+              borderRadius: 3,
+              fontSize: 12,
+              padding: 8,
+              ...(mapConfig.markerStyle ? mapConfig.markerStyle.calloutStyle : {})
+            }
+          }
+        ];
+        console.log('地图标记已初始化:', this.mapMarkers);
+      } catch (error) {
+        console.error('初始化地图标记错误:', error);
+        // 设置默认标记
+        this.mapMarkers = [{
+          id: 1,
+          longitude: 115.980,
+          latitude: 40.360,
+          title: "景点",
+          iconPath: '/static/images/backgrounds/bg.jpg',
+          width: 32,
+          height: 40,
+          callout: {
+            content: "景点",
+            display: 'ALWAYS',
+            bgColor: "#ffffff",
+            color: "#333333",
+            borderRadius: 3,
+            fontSize: 12,
+            padding: 8
+          }
+        }];
+      }
     },
     
     // 加载相关景点
@@ -376,6 +429,15 @@ export default {
     // 播放/暂停音频
     togglePlay() {
       try {
+        // 检查currentSpot是否存在
+        if (!this.currentSpot) {
+          uni.showToast({
+            title: '景点数据加载中，请稍后再试',
+            icon: 'none'
+          });
+          return;
+        }
+        
         // 模拟音频播放
         this.isPlaying = !this.isPlaying;
         
@@ -412,10 +474,19 @@ export default {
     
     // 进度条改变
     onSliderChange(e) {
-      const value = e.detail.value;
-      const time = (value / 100) * this.totalTime;
-      this.audioContext.seek(time);
-      this.currentTime = time;
+      try {
+        if (!this.currentSpot) {
+          return;
+        }
+        
+        const value = e.detail.value;
+        const time = (value / 100) * this.totalTime;
+        // 移除对audioContext.seek的调用，因为我们使用的是模拟方式
+        this.currentTime = time;
+        this.audioProgress = value;
+      } catch (error) {
+        console.error('进度条调整错误:', error);
+      }
     },
     
     // 格式化时间
@@ -428,15 +499,19 @@ export default {
     // 切换景点
     switchSpot(id) {
       this.spotId = id;
-      this.loadSpotData(id);
       
-      // 重置音频
+      // 重置音频播放状态
       if (this.isPlaying) {
-        this.audioContext.pause();
+        if (this.audioPlayTimer) {
+          clearInterval(this.audioPlayTimer);
+        }
+        this.isPlaying = false;
       }
       this.audioProgress = 0;
       this.currentTime = 0;
-      this.isPlaying = false;
+      
+      // 加载新景点数据
+      this.loadSpotData(id);
     },
     
     // 切换3D视图
