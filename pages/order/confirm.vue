@@ -322,6 +322,23 @@ export default {
         this.statusBarHeight = systemInfo.statusBarHeight || 20;
         console.log('状态栏高度:', this.statusBarHeight);
         
+        // 判断是否为iOS设备
+        const isIOS = systemInfo.platform === 'ios';
+        
+        // 如果是iOS设备，增加额外的安全区域高度
+        if (isIOS) {
+          // 检查是否为刘海屏
+          const model = systemInfo.model || '';
+          if (model.indexOf('iPhone X') !== -1 || model.indexOf('iPhone 11') !== -1 || 
+              model.indexOf('iPhone 12') !== -1 || model.indexOf('iPhone 13') !== -1 ||
+              model.indexOf('iPhone 14') !== -1 || model.indexOf('iPhone 15') !== -1 ||
+              this.statusBarHeight > 20) {
+            console.log('检测到刘海屏iPhone');
+            // 为刘海屏增加额外的状态栏高度
+            this.statusBarHeight += 4;
+          }
+        }
+        
         // 获取底部安全区域高度（针对iPhone X及以上机型）
         if (systemInfo.safeAreaInsets) {
           this.safeAreaBottom = systemInfo.safeAreaInsets.bottom || 0;
@@ -384,13 +401,18 @@ export default {
   }
   
   .nav-bar {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 90rpx;
     padding: 0 20rpx;
     background-color: #bc8f56;
+    z-index: 999;
+    margin-top: v-bind(statusBarHeight + 'px');
     
     .left-btn, .right-btn {
       width: 80rpx;
@@ -414,6 +436,12 @@ export default {
       font-weight: bold;
       color: #fff;
       text-align: center;
+      width: 300rpx;
+      line-height: 90rpx;
+      height: 90rpx;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
   
@@ -423,6 +451,7 @@ export default {
     padding: 20rpx 0;
     margin-bottom: 20rpx;
     box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+    margin-top: v-bind((statusBarHeight + 90) + 'px');
     
     .date-tab {
       flex: 1;
