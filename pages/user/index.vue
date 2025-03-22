@@ -58,7 +58,7 @@ export default {
     align-items: center;
     justify-content: center;
     height: 80rpx;
-    padding: 0 20rpx;
+    padding: 0;
     background-color: #bc8f56;
     width: 100%;
     position: relative;
